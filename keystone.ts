@@ -28,9 +28,9 @@ export default withAuth(
       cors: {
         origin: [
           'http://localhost:7777',
-          'https://github.io',
-          'https://the-log.github.io',
           'http://app.log.football',
+          'https://app.log.football',
+          'http://log.football',
           'https://log.football',
         ],
         credentials: true,
