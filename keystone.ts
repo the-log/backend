@@ -35,6 +35,9 @@ export default withAuth(
         ],
         credentials: true,
       }
+    },
+    graphql: {
+      playground: true
     }
   })
 );
