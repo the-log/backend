@@ -23,6 +23,13 @@ export const Player = list({
         isRequired: true,
       },
     }),
+    age: integer(),
+    height: float(),
+    weight: float(),
+    debutYear: integer(),
+    draftYear: integer(),
+    draftRound: integer(),
+    draftSelection: integer(),
     team: text(),
     position: text({
       isIndexed: true,
@@ -50,6 +57,7 @@ export const Player = list({
     pointsThisWeekProj: float({
       isIndexed: true,
     }),
+    splits: json(),
     contract: relationship({
       ref: 'Contract.player'
     }),

@@ -3,11 +3,15 @@ import {
   relationship,
   integer,
   checkbox,
+  timestamp,
 } from '@keystone-6/core/fields';
 import { bidAccess } from '../utils/access';
 
 export const Bid = list({
   fields: {
+    created: timestamp({
+      defaultValue: {kind: 'now'}
+    }),
     team: relationship({
       ref: 'Team',
     }),

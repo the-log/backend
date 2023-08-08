@@ -6,6 +6,7 @@ import {
   checkbox,
 } from '@keystone-6/core/fields';
 import { contractAccess } from '../utils/access';
+import { contractHooks } from '../utils/hooks';
 
 export const Contract = list({
   fields: {
@@ -54,4 +55,5 @@ export const Contract = list({
     isFranchiseTagged: checkbox(),
   },
   access: contractAccess,
+  hooks: contractHooks,
 });
