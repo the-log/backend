@@ -142,49 +142,32 @@ var import_core2 = require("@keystone-6/core");
 var import_fields2 = require("@keystone-6/core/fields");
 
 // utils/hooks.ts
-var getLogMessage = (oldContract, newContract) => {
-  if (!oldContract)
-    return "New Contract";
-  if (!newContract)
-    return "Contract Terminated";
-  if (oldContract.status !== newContract.status) {
-    const statusLabels = {
-      active: "Active Roster",
-      dts: "DTS",
-      waived: "Waivers",
-      ir: "Injured Reserve",
-      rfa: "Restricted Free Agent"
-    };
-    return `To ${statusLabels[newContract.status]}`;
-  }
-  return "See Details";
-};
 var contractHooks = {
-  afterOperation: ({ operation, originalItem, item, context }) => {
-    const message = getLogMessage(
-      originalItem,
-      item
-    );
-    const source = operation === "create" ? item : originalItem;
-    const contract = operation === "delete" ? null : {
-      connect: {
-        id: source.id
-      }
-    };
-    const data = {
-      contract,
-      player: { connect: { id: source.playerId } },
-      team: { connect: { id: source.teamId } },
-      user: { connect: { id: context.session.itemId } },
-      message,
-      oldValues: originalItem,
-      newValues: item
-    };
-    console.log(JSON.stringify(data, null, 2));
-    context.query.ContractLogEntry.createOne({
-      data
-    });
-  }
+  // afterOperation: ({operation, originalItem, item, context }) => {
+  //   const message = getLogMessage(
+  //     (originalItem as unknown as ContractData),
+  //     (item as unknown as ContractData)
+  //   );
+  //   const source = operation === 'create' ? item : originalItem;
+  //   const contract = operation === 'delete' ? null : {
+  //     connect: {
+  //       id: source.id
+  //     }
+  //   }
+  //   const data = {
+  //     contract,
+  //     player: {connect: {id: source.playerId}},
+  //     team: {connect: {id: source.teamId}},
+  //     user: {connect: {id: context.session.itemId}},
+  //     message,
+  //     oldValues: originalItem,
+  //     newValues: item,
+  //   };
+  //   console.log(JSON.stringify(data, null, 2));
+  //   context.query.ContractLogEntry.createOne({
+  //     data,
+  //   })
+  // }
 };
 
 // schema/Contract.ts
@@ -336,6 +319,8 @@ var Player = (0, import_core5.list)({
     }),
     positionRank: (0, import_fields5.integer)(),
     overallRank: (0, import_fields5.integer)(),
+    positionRankProj: (0, import_fields5.integer)(),
+    overallRankProj: (0, import_fields5.integer)(),
     seasonOutlook: (0, import_fields5.text)(),
     outlooksByWeek: (0, import_fields5.json)(),
     isRookie: (0, import_fields5.checkbox)(),

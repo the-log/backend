@@ -62,35 +62,35 @@ const getLogMessage = (oldContract: ContractData, newContract: ContractData) => 
 };
 
 export const contractHooks: ListHooks<BaseListTypeInfo> = {
-  afterOperation: ({operation, originalItem, item, context }) => {
+  // afterOperation: ({operation, originalItem, item, context }) => {
 
-    const message = getLogMessage(
-      (originalItem as unknown as ContractData),
-      (item as unknown as ContractData)
-    );
+  //   const message = getLogMessage(
+  //     (originalItem as unknown as ContractData),
+  //     (item as unknown as ContractData)
+  //   );
 
-    const source = operation === 'create' ? item : originalItem;
-    const contract = operation === 'delete' ? null : {
-      connect: {
-        id: source.id
-      }
-    }
+  //   const source = operation === 'create' ? item : originalItem;
+  //   const contract = operation === 'delete' ? null : {
+  //     connect: {
+  //       id: source.id
+  //     }
+  //   }
 
-    const data = {
-      contract,
-      player: {connect: {id: source.playerId}},
-      team: {connect: {id: source.teamId}},
-      user: {connect: {id: context.session.itemId}},
-      message,
-      oldValues: originalItem,
-      newValues: item,
-    };
+  //   const data = {
+  //     contract,
+  //     player: {connect: {id: source.playerId}},
+  //     team: {connect: {id: source.teamId}},
+  //     user: {connect: {id: context.session.itemId}},
+  //     message,
+  //     oldValues: originalItem,
+  //     newValues: item,
+  //   };
 
-    console.log(JSON.stringify(data, null, 2));
+  //   console.log(JSON.stringify(data, null, 2));
 
 
-    context.query.ContractLogEntry.createOne({
-      data,
-    })
-  }
+  //   context.query.ContractLogEntry.createOne({
+  //     data,
+  //   })
+  // }
 }

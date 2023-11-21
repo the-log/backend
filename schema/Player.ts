@@ -41,6 +41,8 @@ export const Player = list({
     }),
     positionRank: integer(),
     overallRank: integer(),
+    positionRankProj: integer(),
+    overallRankProj: integer(),
     seasonOutlook: text(),
     outlooksByWeek: json(),
     isRookie: checkbox(),
