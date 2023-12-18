@@ -29,5 +29,15 @@ export const User = list({
       defaultValue: true,
     }),
   },
-  access: userAccess
+  access: userAccess,
+  hooks: {
+    resolveInput: async ({ resolvedData, context }) => {
+      // If making first user, make them an admin.
+      const count = await context.query.User.count();
+      if (count === 0) {
+        resolvedData.isAdmin = true;
+      }
+      return resolvedData;
+    }
+  }
 });
