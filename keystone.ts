@@ -32,12 +32,16 @@ export default withAuth(
           'https://app.log.football',
           'http://log.football',
           'https://log.football',
+          'https://app.log.ddev.site',
         ],
         credentials: true,
       }
     },
     graphql: {
-      playground: true
+      playground: true,
+      apolloConfig: {
+        introspection: true,
+      }
     }
   })
 );
