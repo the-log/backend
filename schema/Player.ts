@@ -43,7 +43,12 @@ export const Player = list({
     overallRank: integer(),
     positionRankProj: integer(),
     overallRankProj: integer(),
-    seasonOutlook: text(),
+    seasonOutlook: text({
+      db: {
+        nativeType: 'Text',
+        isNullable: true,
+      },
+    }),
     outlooksByWeek: json(),
     isRookie: checkbox(),
     fullStats: json(),
