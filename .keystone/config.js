@@ -109,6 +109,7 @@ var Bid = (0, import_core.list)({
     created: (0, import_fields.timestamp)({
       defaultValue: { kind: "now" }
     }),
+    locked: (0, import_fields.timestamp)(),
     team: (0, import_fields.relationship)({
       ref: "Team"
     }),
@@ -129,10 +130,7 @@ var Bid = (0, import_core.list)({
         max: 100
       }
     }),
-    is_dts: (0, import_fields.checkbox)(),
-    is_locked: (0, import_fields.checkbox)({
-      defaultValue: false
-    })
+    is_dts: (0, import_fields.checkbox)()
   },
   access: bidAccess
 });
@@ -321,7 +319,12 @@ var Player = (0, import_core5.list)({
     overallRank: (0, import_fields5.integer)(),
     positionRankProj: (0, import_fields5.integer)(),
     overallRankProj: (0, import_fields5.integer)(),
-    seasonOutlook: (0, import_fields5.text)(),
+    seasonOutlook: (0, import_fields5.text)({
+      db: {
+        nativeType: "Text",
+        isNullable: true
+      }
+    }),
     outlooksByWeek: (0, import_fields5.json)(),
     isRookie: (0, import_fields5.checkbox)(),
     fullStats: (0, import_fields5.json)(),
@@ -497,68 +500,26 @@ var User = (0, import_core8.list)({
       defaultValue: true
     })
   },
-  access: userAccess
+  access: userAccess,
+  hooks: {
+    resolveInput: async ({ resolvedData, context }) => {
+      const count = await context.query.User.count();
+      if (count === 0) {
+        resolvedData.isAdmin = true;
+      }
+      return resolvedData;
+    }
+  }
 });
 
-// schema/FreeAgencyCalendar.ts
+// schema/LeagueSetting.ts
 var import_core9 = require("@keystone-6/core");
 var import_fields9 = require("@keystone-6/core/fields");
-var FreeAgencyCalendar = (0, import_core9.list)({
+var LeagueSetting = (0, import_core9.list)({
   fields: {
-    preseason: (0, import_fields9.timestamp)({
-      label: "Preseason"
-    }),
-    week1: (0, import_fields9.timestamp)({
-      label: "Week 1"
-    }),
-    week2: (0, import_fields9.timestamp)({
-      label: "Week 2"
-    }),
-    week3: (0, import_fields9.timestamp)({
-      label: "Week 3"
-    }),
-    week4: (0, import_fields9.timestamp)({
-      label: "Week 4"
-    }),
-    week5: (0, import_fields9.timestamp)({
-      label: "Week 5"
-    }),
-    week6: (0, import_fields9.timestamp)({
-      label: "Week 6"
-    }),
-    week7: (0, import_fields9.timestamp)({
-      label: "Week 7"
-    }),
-    week8: (0, import_fields9.timestamp)({
-      label: "Week 8"
-    }),
-    week9: (0, import_fields9.timestamp)({
-      label: "Week 9"
-    }),
-    week10: (0, import_fields9.timestamp)({
-      label: "Week 10"
-    }),
-    week11: (0, import_fields9.timestamp)({
-      label: "Week 11"
-    }),
-    week12: (0, import_fields9.timestamp)({
-      label: "Week 12"
-    }),
-    week13: (0, import_fields9.timestamp)({
-      label: "Week 13"
-    }),
-    week14: (0, import_fields9.timestamp)({
-      label: "Week 14"
-    }),
-    week15: (0, import_fields9.timestamp)({
-      label: "Week 15"
-    }),
-    week16: (0, import_fields9.timestamp)({
-      label: "Week 16"
-    }),
-    week17: (0, import_fields9.timestamp)({
-      label: "Week 17"
-    })
+    season: (0, import_fields9.integer)(),
+    phase: (0, import_fields9.text)(),
+    bid_deadlines: (0, import_fields9.json)()
   },
   isSingleton: true,
   access: readOnly
@@ -574,7 +535,7 @@ var lists = {
   Team,
   Trade,
   User,
-  FreeAgencyCalendar
+  LeagueSetting
 };
 
 // auth.ts
@@ -637,13 +598,18 @@ var keystone_default = withAuth(
           "http://app.log.football",
           "https://app.log.football",
           "http://log.football",
-          "https://log.football"
+          "https://log.football",
+          "https://app.log.ddev.site"
         ],
         credentials: true
       }
     },
     graphql: {
-      playground: true
+      playground: true,
+      apolloConfig: {
+        introspection: true
+      }
     }
   })
 );
+//# sourceMappingURL=config.js.map

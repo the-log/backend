@@ -7,7 +7,7 @@ import { Player } from "./schema/Player";
 import { Team } from "./schema/Team";
 import { Trade } from "./schema/Trade";
 import { User } from "./schema/User";
-import { FreeAgencyCalendar } from "./schema/FreeAgencyCalendar";
+import { LeagueSetting } from "./schema/LeagueSetting";
 import { list } from '@keystone-6/core';
 
 export const lists: Lists = {
@@ -19,5 +19,5 @@ export const lists: Lists = {
   Team,
   Trade,
   User,
-  FreeAgencyCalendar,
+  LeagueSetting,
 };

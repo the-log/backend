@@ -12,6 +12,7 @@ export const Bid = list({
     created: timestamp({
       defaultValue: {kind: 'now'}
     }),
+    locked: timestamp(),
     team: relationship({
       ref: 'Team',
     }),
@@ -33,9 +34,6 @@ export const Bid = list({
       },
     }),
     is_dts: checkbox(),
-    is_locked: checkbox({
-      defaultValue: false,
-    }),
   },
   access: bidAccess,
 });
