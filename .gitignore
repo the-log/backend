@@ -5,3 +5,4 @@ keystone.db
 *.env
 schema.prisma
 schema.graphql
+process.config.js
