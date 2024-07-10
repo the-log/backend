@@ -11,6 +11,7 @@ import { createAuth } from '@keystone-6/auth';
 
 // See https://keystonejs.com/docs/apis/session#session-api for the session docs
 import { statelessSessions } from '@keystone-6/core/session';
+import sendMail from "./utils/mail";
 
 let sessionSecret = process.env.SESSION_SECRET;
 
@@ -38,6 +39,18 @@ const { withAuth } = createAuth({
     // If there are no items in the database, keystone will ask you to create
     // a new user, filling in these fields.
     fields: ['name', 'email', 'password'],
+  },
+  passwordResetLink: {
+    sendToken: async ({ itemId, identity, token, context }) => {
+      await sendMail(identity, 'Password reset link', `Token: ${token}`);
+    },
+    tokensValidForMins: 60,
+  },
+  magicAuthLink: {
+    sendToken: async ({ itemId, identity, token, context }) => {
+      await sendMail(identity, 'Magic link', `Token: ${token}`);
+     },
+    tokensValidForMins: 60,
   },
 });
 

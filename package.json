@@ -6,16 +6,22 @@
     "dev": "keystone dev",
     "start": "keystone start",
     "build": "keystone build",
-    "postinstall": "keystone postinstall"
+    "postinstall": "keystone postinstall",
+    "script": "tsx scraper/index.ts"
   },
   "dependencies": {
     "@keystone-6/auth": "^8.0",
     "@keystone-6/core": "^6.0",
     "@keystone-6/fields-document": "^9.0",
     "dotenv": "^16.0.1",
+    "nodemailer": "^6.9.14",
     "typescript": "^4.7.4"
   },
   "engines": {
     "node": "^14.15 || ^16.13 || ^18.7.0"
+  },
+  "devDependencies": {
+    "@types/nodemailer": "^6.4.15",
+    "tsx": "^4.9.4"
   }
 }
