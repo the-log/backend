@@ -37,17 +37,33 @@ export const fetchGeneralPlayerData = async (ids: number[]) => {
   } = generalApi;
 
   let curr = 0;
-  let total = ids.length;
+  const total = ids.length;
+  const batchSize = 100;
 
-  const generalData = await Promise.allSettled(ids.map(id => {
-    return fetch(`${espn}/athletes/${id}`)
-      .then(r => r.json())
-      .then((data: GeneralPlayer) => {
-        curr++;
-        process.stdout.write(`\r    ${curr}/${total}`);
-        return data;
-      })
-  }));
+  const generalData = [];
+
+  while (ids.length) {
+    const batch = await Promise.allSettled(
+      ids.splice(0, batchSize)
+      .map(id => (
+        fetch(`${espn}/athletes/${id}`)
+          .then(r => {
+
+            return r.json()
+          })
+          .then((data: GeneralPlayer) => {
+            curr++;
+            process.stdout.write(`\r    ${curr}/${total}`);
+            return data;
+          })
+      ))
+    )
+
+
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    generalData.push(...batch);
+  }
   process.stdout.write(`\n`);
 
   return (generalData.map(result => {
@@ -190,9 +206,7 @@ export const updatePlayerData = async (year: number, db: KeystoneDbAPI<any>) => 
   const fantasyPlayerData = await fetchFantasyPlayerData(year);
   const ids = fantasyPlayerData.map(player => player.player.id);
   const generalPlayerData = await fetchGeneralPlayerData(ids);
-  const existingPlayers = await db.Player.findMany({
-    skip: 0,
-  });
+  const existingPlayers = await db.Player.findMany();
   const existingIds = existingPlayers.map(player => player.espn_id);
 
   const rawPlayerData: any = {};

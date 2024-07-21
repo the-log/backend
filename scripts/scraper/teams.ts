@@ -21,7 +21,7 @@ export const fetchTeamData = async (year: number) => {
   // console.log(teamInfo);
 
   const { teams } = (await fetch(teamInfo, opt).then(res => res.json()));
-  console.log(`  🗓 Found ${0} fantasy players...`);
+  console.log(`  🗓 Found ${teams.length} teams...`);
 
   return (teams as FantasyTeam[]);
 }

@@ -10,7 +10,6 @@ import { updateTeamData } from './teams';
   // Season advances July 1.
   const today = new Date();
   const season = today.getMonth() > 6 ? today.getFullYear() : today.getFullYear() - 1;
-
-  await updatePlayerData(season, db);
   await updateTeamData(season, db);
+  await updatePlayerData(season, db);
 })()
