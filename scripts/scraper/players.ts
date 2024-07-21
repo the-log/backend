@@ -233,17 +233,28 @@ export const updatePlayerData = async (year: number, db: KeystoneDbAPI<any>) => 
 
   const playersToUpdate = shapedPlayerData.filter(player => existingIds.includes(player.espn_id))
   const playersToInsert = shapedPlayerData.filter(player => !existingIds.includes(player.espn_id))
+  const batchSize = 100;
 
-  await db.Player.updateMany({
-    data: playersToUpdate.map(player => ({
-      where: { espn_id: player.espn_id },
-      data: player
-    }))
-  });
+  while (playersToUpdate.length) {
+    const batch = playersToUpdate.splice(0, batchSize);
 
-  await db.Player.createMany({
-    data: playersToInsert
-  })
+    await db.Player.updateMany({
+      data: batch.map(player => ({
+        where: { espn_id: player.espn_id },
+        data: player
+      }))
+    });
+  }
 
-  // await writeFile('./ShapedData.json', JSON.stringify(shapedPlayerData, null, 2))
+  while (playersToUpdate.length) {
+    const batch = playersToInsert.splice(0, batchSize);
+
+    await db.Player.updateMany({
+      data: batch.map(player => ({
+        where: { espn_id: player.espn_id },
+        data: player
+      }))
+    });
+  }
+
 }
