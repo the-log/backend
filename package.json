@@ -8,7 +8,9 @@
     "build": "keystone build",
     "postinstall": "keystone postinstall --fix",
     "scrape": "tsx scripts/scraper/index.ts",
-    "offseason": "tsx scripts/offseason/index.ts"
+    "offseason": "tsx scripts/offseason/index.ts",
+    "free-agency": "tsx scripts/free_agency/index.ts",
+    "import-contracts": "tsx scripts/contracts/index.ts"
   },
   "dependencies": {
     "@keystone-6/auth": "^8.0",

@@ -10,12 +10,6 @@ import { contractHooks } from '../utils/hooks';
 
 export const Contract = list({
   fields: {
-    node_id: integer({
-      validation: {
-        isRequired: true,
-      },
-      isIndexed: 'unique',
-    }),
     salary: integer({
       validation: {
         isRequired: true,
