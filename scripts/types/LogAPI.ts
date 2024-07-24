@@ -29,21 +29,22 @@ export interface Player {
 }
 
 export interface Team {
-  espn_id:        number;
-  name:           string;
-  logo:           string;
-  abbreviation:   string;
-  projectedRank:  number;
-  playoffSeed:    number;
-  wins:           number;
-  losses:         number;
-  ties:           number;
-  pointsFor:      number;
-  pointsAgainst:  number;
-  percentage:     number;
-  gamesBack:      number;
-  streakLength:   number;
-  streakType:     string;
+  espn_id:             number;
+  name:                string;
+  logo:                string;
+  abbreviation:        string;
+  projectedRank:       number;
+  rankCalculatedFinal: number;
+  playoffSeed:         number;
+  wins:                number;
+  losses:              number;
+  ties:                number;
+  pointsFor:           number;
+  pointsAgainst:       number;
+  percentage:          number;
+  gamesBack:           number;
+  streakLength:        number;
+  streakType:          string;
 }
 
 export interface Contract {

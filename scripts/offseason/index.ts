@@ -10,28 +10,39 @@ const { db } = getContext(config, PrismaModule).sudo();
  */
 (async () => {
 
-// 1. Terminate all waived contracts
-await deleteWaivedContracts();
+  // 1. Terminate all waived contracts
+  await deleteWaivedContracts();
 
-// 2. Move all IR contracts back to active roster
-await restoreInjuredReserve();
+  // 2. Move all IR contracts back to active roster
+  await restoreInjuredReserve();
 
-// 3. Decrement all active & dts contracts by 1 year
-await decrementContractYears();
+  // 3. Decrement all active & dts contracts by 1 year
+  await decrementContractYears();
 
-// 4. Change contract status for 0-year contracts to RFA
-await setRFAContracts();
+  // 4. Change contract status for 0-year contracts to RFA
+  await setRFAContracts();
 
-// 5. Increment all active contract salaries by 10%
-await yearlyRaises();
+  // 5. Calculate Franchise Tag Prices
+  await calculateFTRates();
 
-// 6. Check dts contracts for top performers & 0yrs and mark contracts
-await flagBadContracts();
+  // 6. Increment all active contract salaries by 10%
+  await yearlyRaises();
 
-// 7. Add rookie draft picks for 3 years in the future
-await createFutureDraftPicks();
+  // 7. Check dts contracts for top performers & 0yrs and mark contracts
+  await flagBadContracts();
 
-// 8. Email all users about league year cycling
+  // 8. Add rookie draft picks for 3 years in the future
+  await createFutureDraftPicks();
+
+  // 9. Set Rookie Draft Order
+  await createDraftOrder();
+
+  // 10. Create random RFA order
+  await createRFAOrder();
+
+  // 11. Email all users about league year cycling
+  // TODO
+
 })()
 
 async function deleteWaivedContracts() {
@@ -213,5 +224,104 @@ async function createFutureDraftPicks() {
 
   await db.DraftPick.createMany({
     data: picks
+  });
+}
+
+async function createDraftOrder() {
+  const contenders = await db.Team.findMany({
+    orderBy: {
+      rankCalculatedFinal: "asc"
+    },
+    take: 6
+  });
+
+  const pretenders = await db.Team.findMany({
+    orderBy: {
+      playoffSeed: "desc"
+    },
+     take: 4
+  })
+
+  const teams = [...pretenders, ...contenders.toReversed()];
+
+  const order = teams.map(({id, espn_id, name}) => ({
+    id,
+    espn_id,
+    name
+  }))
+
+  await db.LeagueSetting.updateOne({
+    where: { id: 1 },
+    data: {
+      draft_order: order
+    }
+  });
+}
+
+async function calculateFTRates() {
+  const positionRates = {
+    QB: 0,
+    RB: 0,
+    WR: 0,
+    TE: 0,
+    K : 0,
+    DL: 0,
+    LB: 0,
+    DB: 0,
+  }
+
+  for (const pos of Object.keys(positionRates)) {
+
+    let posFilter: any = {
+      equals: pos
+    }
+
+    if (pos === "DL") {
+      posFilter = {
+        in: ["DT", "DE"]
+      }
+    }
+
+    if (pos === "DB") {
+      posFilter = {
+        in: ["CB", "S"]
+      }
+    }
+
+    const contracts = await db.Contract.findMany({
+      where: {
+        player: {
+          position: posFilter
+        }
+      },
+      take: 5,
+      orderBy: [{ salary: 'desc' }],
+    });
+
+    positionRates[pos] = Math.round(contracts.reduce((total, contract) => total + contract.salary, 0) / 5)
+  }
+
+  await db.LeagueSetting.updateOne({
+    where: { id: 1 },
+    data: {
+      ft_prices: positionRates
+    }
+  })
+}
+
+async function createRFAOrder() {
+  const teams = await db.Team.findMany();
+
+  const order = teams.map(({id, espn_id, name}) => ({
+    id,
+    espn_id,
+    name
+  })).sort(() => Math.sign(Math.random() - 0.5))
+
+  await db.LeagueSetting.updateOne({
+    where: { id: 1 },
+    data: {
+      rfa_order: order
+    }
   });
 }

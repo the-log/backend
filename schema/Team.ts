@@ -23,6 +23,7 @@ export const Team = list({
     }),
     projectedRank: integer(),
     playoffSeed: integer(),
+    rankCalculatedFinal: integer(),
     wins: integer(),
     losses: integer(),
     ties: integer(),

@@ -7,9 +7,19 @@ import { updateTeamData } from './teams';
 (async () => {
   const { db } = getContext(config, PrismaModule).sudo();
 
-  // Season advances July 1.
-  const today = new Date();
-  const season = today.getMonth() > 5 ? today.getFullYear() : today.getFullYear() - 1;
-  await updateTeamData(season, db);
+  const settings: {season: number, phase: string} = await db.LeagueSetting.findOne({where:{id:1}});
+
+  const {
+    season,
+    phase
+  } = settings
+
+  if (phase === "active") {
+    await updateTeamData(season, db);
+  } else {
+    await updateTeamData(season - 1, db);
+  }
+
   await updatePlayerData(season, db);
+
 })()
