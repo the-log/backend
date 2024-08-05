@@ -111,6 +111,7 @@ export const shapePlayerData = (rawData: CombinedData[], year: number) => {
       const { fantasy, general }: {fantasy: FantasyPlayer, general: GeneralPlayer} = player;
 
       if (fantasy && general) {
+
         const team = getMappedValue(fantasy.player.proTeamId, teamMap);
         const position = getMappedValue(fantasy.player.defaultPositionId, positionMap);
         const weight = getMappedValue(position, positionWeight);
@@ -158,7 +159,7 @@ export const shapePlayerData = (rawData: CombinedData[], year: number) => {
 
         const shapedPlayer: LOGPlayer = {
           espn_id: fantasy.id,
-          name: fantasy.player.fullName,
+          name: fantasy?.player?.fullName,
           age: general.age,
           height: general.height,
           weight: general.weight,
@@ -170,7 +171,7 @@ export const shapePlayerData = (rawData: CombinedData[], year: number) => {
           position,
           positionWeight: weight,
           isIrEligible: fantasy.player.injured,
-          injuryStatus: general.status?.type as InjuryStatus,
+          injuryStatus: fantasy.player?.injuryStatus as InjuryStatus,
           positionRank: rankings.positionalRanking || 9999,
           overallRank: rankings.totalRanking || 9999,
           positionRankProj: 9999,
