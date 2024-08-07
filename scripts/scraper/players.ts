@@ -247,14 +247,11 @@ export const updatePlayerData = async (year: number, db: KeystoneDbAPI<any>) => 
     });
   }
 
-  while (playersToUpdate.length) {
+  while (playersToInsert.length) {
     const batch = playersToInsert.splice(0, batchSize);
 
-    await db.Player.updateMany({
-      data: batch.map(player => ({
-        where: { espn_id: player.espn_id },
-        data: player
-      }))
+    await db.Player.createMany({
+      data: batch
     });
   }
 
