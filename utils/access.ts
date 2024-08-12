@@ -25,8 +25,14 @@ export const contractAccess: ListAccessControl<BaseListTypeInfo> = {
   operation: {
     query: ({ session }) => Boolean(session),
     create: ({ session }) => (session?.data.isAdmin),
-    update: ({ session }) => (session?.data.isAdmin),
+    update: ({ session }) => (session?.data.isOwner),
     delete: ({ session }) => (session?.data.isAdmin),
+  },
+  item: {
+    update: ({ session, item }) => (
+      session.data.isAdmin ||
+      item.teamId === session.data.team.id
+    ),
   }
 };
 
