@@ -26,13 +26,17 @@ export const contractAccess: ListAccessControl<BaseListTypeInfo> = {
     query: ({ session }) => Boolean(session),
     create: ({ session }) => (session?.data.isAdmin),
     update: ({ session }) => (session?.data.isOwner),
-    delete: ({ session }) => (session?.data.isAdmin),
+    delete: ({ session }) => (session?.data.isOwner),
   },
   item: {
     update: ({ session, item }) => (
       session.data.isAdmin ||
       item.teamId === session.data.team.id
     ),
+    delete: ({ session, item }) => (
+      session.data.isAdmin ||
+      (item.status === 'dts' && item.teamId === session.data.team.id)
+    )
   }
 };
 
