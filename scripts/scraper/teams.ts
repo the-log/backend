@@ -35,7 +35,7 @@ export const shapeTeamData = (rawData: FantasyTeam[]) => {
       espn_id: team.id,
       name: team.name,
       logo: team.logo,
-      abbreviation: team.abbrev,
+      abbreviation: team.abbrev?.toUpperCase(),
       projectedRank: team.currentProjectedRank,
       rankCalculatedFinal: team.rankCalculatedFinal,
       playoffSeed: team.playoffSeed,
