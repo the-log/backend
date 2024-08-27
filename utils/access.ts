@@ -14,10 +14,56 @@ export const readOnly: ListAccessControl<BaseListTypeInfo> = {
 
 export const bidAccess: ListAccessControl<BaseListTypeInfo> = {
   operation: {
-    query: ({session}) => true,
-    create: ({ session }) => (session?.data.isOwner),
-    update: ({ session }) => (session?.data.isOwner),
-    delete: ({ session }) => (session?.data.isOwner),
+    query: ({ session }) => Boolean(session?.data.isOwner),
+    create: ({ session }) => Boolean(session?.data.isOwner),
+    update: ({ session }) => Boolean(session?.data.isOwner),
+    delete: ({ session }) => Boolean(session?.data.isOwner),
+  },
+  filter: {
+    query: ({ session, context, listKey, operation }) => {
+      const isAdmin = Boolean(session?.data?.isAdmin)
+      const fromClient = (
+        context.req?.headers?.origin?.includes('log.football') ||
+        context.req?.headers?.origin?.includes('app.log.ddev.site')
+      )
+
+      // Admins in backend should have full access
+      if (isAdmin && !fromClient) {
+        return {}
+      }
+
+      // Filter client-side results to locked & own prepublish
+      return {
+        OR: [
+          {
+            team: {
+              id: {
+                equals: "cll300khv0006rwp6hnze30ns"
+              }
+            }
+          },
+          {
+            locked: {
+              not: null
+            }
+          }
+        ]
+      };
+    }
+  },
+  item: {
+    update: ({ session, item }) => {
+      const isOwnBid = session?.data?.team?.id === item?.teamId
+      const isLocked = Boolean(item?.locked)
+
+      return !isLocked && isOwnBid;
+    },
+    delete: ({ session, item }) => {
+      const isOwnBid = session?.data?.team?.id === item?.teamId
+      const isLocked = Boolean(item?.locked)
+
+      return !isLocked && isOwnBid;
+    }
   }
 };
 

@@ -33,6 +33,7 @@ export const Bid = list({
         max: 100,
       },
     }),
+    bid_order: integer(),
     is_dts: checkbox(),
   },
   access: bidAccess,
