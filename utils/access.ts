@@ -20,7 +20,7 @@ export const bidAccess: ListAccessControl<BaseListTypeInfo> = {
     delete: ({ session }) => Boolean(session?.data.isOwner),
   },
   filter: {
-    query: ({ session, context, listKey, operation }) => {
+    query: ({ session, context }) => {
       const isAdmin = Boolean(session?.data?.isAdmin)
       const fromClient = (
         context.req?.headers?.origin?.includes('log.football') ||
@@ -38,7 +38,7 @@ export const bidAccess: ListAccessControl<BaseListTypeInfo> = {
           {
             team: {
               id: {
-                equals: "cll300khv0006rwp6hnze30ns"
+                equals: session?.data?.team?.id
               }
             }
           },
