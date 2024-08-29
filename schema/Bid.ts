@@ -23,7 +23,7 @@ export const Bid = list({
       validation: {
         isRequired: true,
         min: 100,
-        max: 10000,
+        max: 100000,
       },
     }),
     years: integer({
@@ -34,6 +34,7 @@ export const Bid = list({
       },
     }),
     bid_order: integer(),
+    eval_order: integer(),
     is_dts: checkbox(),
   },
   access: bidAccess,
