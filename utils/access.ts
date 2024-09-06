@@ -22,13 +22,13 @@ export const bidAccess: ListAccessControl<BaseListTypeInfo> = {
   filter: {
     query: ({ session, context }) => {
       const isAdmin = Boolean(session?.data?.isAdmin)
-      const fromClient = (
-        !context.req?.headers?.origin?.includes('api.log.football') ||
-        !context.req?.headers?.origin?.includes('api.log.ddev.site')
+      const fromBackend = (
+        context.req?.headers?.origin?.includes('api.log.football') ||
+        context.req?.headers?.origin?.includes('api.log.ddev.site')
       )
 
       // Admins in backend should have full access
-      if (isAdmin && !fromClient) {
+      if (isAdmin && fromBackend) {
         return {}
       }
 

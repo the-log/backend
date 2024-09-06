@@ -76,11 +76,13 @@ export const contractHooks: ListHooks<BaseListTypeInfo> = {
       }
     }
 
+    const user = context?.session?.itemId
+
     const data = {
       contract,
       player: {connect: {id: source.playerId}},
       team: {connect: {id: source.teamId}},
-      user: {connect: {id: context.session.itemId}},
+      user: user ? {connect: {id: user}} : null,
       message,
       oldValues: originalItem,
       newValues: item,

@@ -34,14 +34,22 @@ const { db, query } = getContext(config, PrismaModule).sudo();
           salary,
           years,
           team: {
-            contractTotals: existing
+            id: teamId
           }
         } = bid;
 
+        // Get cap space info
+        const {contractTotals} = await query.Team.findOne({
+          where: {
+            id: teamId
+          },
+          query: "contractTotals",
+        });
+
         if (
-          years + existing.years > 100 ||
-          salary + existing.salary > 100000 ||
-          existing.active >= 40
+          years + contractTotals.years > 100 ||
+          salary + contractTotals.salary > 100000 ||
+          contractTotals.active >= 40
         ) {
           invalid.push(bid)
         } else {
@@ -50,8 +58,25 @@ const { db, query } = getContext(config, PrismaModule).sudo();
       }
 
       if (valid.length) {
-        // TODO: award winning contracts
-        // console.log(valid[0]);
+        const winner = valid[0];
+
+        db.Contract.createOne({
+          data: {
+            salary: winner.salary,
+            years: winner.years,
+            status: 'active',
+            team: {
+              connect: {
+                id: winner.teamId
+              }
+            },
+            player: {
+              connect: {
+                id: winner.playerId
+              }
+            }
+          }
+        });
       }
 
       let bidOrder = 0;
@@ -71,14 +96,14 @@ const { db, query } = getContext(config, PrismaModule).sudo();
       }
     }
 
-    // await db.LeagueSetting.updateOne({
-    //   where: {
-    //     id:1
-    //   },
-    //   data: {
-    //     bid_deadlines: future
-    //   }
-    // });
+    await db.LeagueSetting.updateOne({
+      where: {
+        id:1
+      },
+      data: {
+        bid_deadlines: future
+      }
+    });
   }
 
 })()
@@ -94,7 +119,7 @@ async function getOpenBids() {
   });
 
   const teams = await query.Team.findMany({
-    query: "id percentage pointsFor pointsAgainst contractTotals",
+    query: "id percentage pointsFor pointsAgainst",
   });
 
   // Sort bids by salary so higher values are processed first.
