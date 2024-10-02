@@ -80,9 +80,9 @@ export const contractHooks: ListHooks<BaseListTypeInfo> = {
 
     const data = {
       contract,
-      player: {connect: {id: source.playerId}},
-      team: {connect: {id: source.teamId}},
-      user: user ? {connect: {id: user}} : null,
+      player: source.playerId ? {connect: {id: source.playerId}} : null,
+      team: source?.teamId ? {connect: {id: source.teamId}} : null,
+      user: user ? {connect: {id: user || null}} : null,
       message,
       oldValues: originalItem,
       newValues: item,
