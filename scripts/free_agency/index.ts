@@ -17,7 +17,7 @@ const { db, query } = getContext(config, PrismaModule).sudo();
     let evalOrder = 0;
     for (const bidGroup of bids.entries()) {
       evalOrder++
-      const [_playerID, bids] = bidGroup;
+      const [playerID, bids] = bidGroup;
 
       // Sort bids (salary, length, record, points-for).
       bids
@@ -60,7 +60,24 @@ const { db, query } = getContext(config, PrismaModule).sudo();
       if (valid.length) {
         const winner = valid[0];
 
-        db.Contract.createOne({
+        // Search for contracts on the won player
+        const player = await query.Player.findOne({
+          where: {
+            id: playerID
+          },
+          query: "contract {id}",
+        });
+
+        // Delete waived contract
+        if (player?.contract?.id) {
+          db.Contract.deleteOne({
+            where: {
+              id: player.contract.id
+            }
+          })
+        }
+
+        await db.Contract.createOne({
           data: {
             salary: winner.salary,
             years: winner.years,
