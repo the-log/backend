@@ -1,6 +1,5 @@
 import {
   ListHooks,
-  BaseListTypeInfo,
   KeystoneContextFromListTypeInfo,
 } from '@keystone-6/core/types';
 
@@ -61,8 +60,10 @@ const getLogMessage = (oldContract: ContractData, newContract: ContractData) => 
   return 'See Details';
 };
 
-export const contractHooks: ListHooks<BaseListTypeInfo> = {
+export const contractHooks: ListHooks<any> = {
   afterOperation: ({operation, originalItem, item, context }) => {
+    // Dont make log messages in test runs.
+    if (process.env.TESTING === 'true') return;
 
     const message = getLogMessage(
       (originalItem as unknown as ContractData),
@@ -91,5 +92,88 @@ export const contractHooks: ListHooks<BaseListTypeInfo> = {
     context.sudo().query.ContractLogEntry.createOne({
       data,
     })
+  },
+
+  beforeOperation: async ({operation, item, context}) => {
+    if (operation === 'delete') {
+      // 1. Find all log entries referencing this contract
+      const logEntries = await context.sudo().db.ContractLogEntry.findMany({
+        where: { contract: { id: { equals: item.id } } },
+      });
+
+      // 2. Nullify the contract field for each
+      await context.sudo().query.ContractLogEntry.updateMany({
+        data: logEntries.map(entry => ({
+          where: { id: entry.id },
+          data: { contract: null }
+        }))
+      });
+    }
   }
 }
+
+export const playerHooks: ListHooks<any> = {
+  beforeOperation: async ({operation, item, context}) => {
+    if (operation === 'delete') {
+      // 1. Find all log entries referencing this player
+      const logEntries = await context.sudo().db.ContractLogEntry.findMany({
+        where: { player: { id: { equals: item.id } } },
+      });
+
+      // 2. Nullify the player field for each
+      await context.sudo().query.ContractLogEntry.updateMany({
+        data: logEntries.map(entry => ({
+          where: { id: entry.id },
+          data: { player: null }
+        }))
+      });
+    }
+  }
+}
+
+export const teamHooks: ListHooks<any> = {
+  beforeOperation: async ({operation, item, context}) => {
+    if (operation === 'delete') {
+      // 1. Find all log entries referencing this team
+      const logEntries = await context.sudo().db.ContractLogEntry.findMany({
+        where: { team: { id: { equals: item.id } } },
+      });
+
+      // 2. Nullify the team field for each
+      await context.sudo().query.ContractLogEntry.updateMany({
+        data: logEntries.map(entry => ({
+          where: { id: entry.id },
+          data: { team: null }
+        }))
+      });
+    }
+  }
+}
+
+export const userHooks: ListHooks<any> = {
+  resolveInput: async ({ resolvedData, context }) => {
+    // If making first user, make them an admin.
+    const count = await context.query.User.count();
+    if (count === 0) {
+      resolvedData.isAdmin = true;
+    }
+    return resolvedData;
+  },
+  beforeOperation: async ({operation, item, context}) => {
+    if (operation === 'delete') {
+      // 1. Find all log entries referencing this user
+      const logEntries = await context.sudo().db.ContractLogEntry.findMany({
+        where: { user: { id: { equals: item.id } } },
+      });
+
+      // 2. Nullify the user field for each
+      await context.sudo().query.ContractLogEntry.updateMany({
+        data: logEntries.map(entry => ({
+          where: { id: entry.id },
+          data: { user: null }
+        }))
+      });
+    }
+  }
+}
+

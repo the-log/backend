@@ -7,6 +7,7 @@ import {
   virtual,
 } from '@keystone-6/core/fields';
 import { teamAccess } from '../utils/access';
+import { teamHooks } from '../utils/hooks';
 
 export const Team = list({
   fields: {
@@ -102,5 +103,6 @@ export const Team = list({
       many: true,
     }),
   },
-  access: teamAccess
+  access: teamAccess,
+  hooks: teamHooks,
 });

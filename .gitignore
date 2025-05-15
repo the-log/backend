@@ -6,3 +6,5 @@ keystone.db
 schema.prisma
 schema.graphql
 process.config.js
+.DS_Store
+/migrations

@@ -7,8 +7,10 @@ import {
 } from '@keystone-6/core/fields';
 
 import { userAccess } from '../utils/access';
+import { userHooks } from '../utils/hooks';
+import { Lists } from '.keystone/types';
 
-export const User = list({
+export const User: Lists.User = list({
   fields: {
     name: text({ validation: { isRequired: true } }),
     email: text({
@@ -16,7 +18,12 @@ export const User = list({
       isIndexed: 'unique',
       isFilterable: true,
     }),
-    password: password({ validation: { isRequired: true } }),
+    password: password({
+      validation: { isRequired: true },
+      access: {
+        read: () => false,
+      }
+    }),
     team: relationship({
       ref: 'Team.owner',
     }),
@@ -30,14 +37,5 @@ export const User = list({
     }),
   },
   access: userAccess,
-  hooks: {
-    resolveInput: async ({ resolvedData, context }) => {
-      // If making first user, make them an admin.
-      const count = await context.query.User.count();
-      if (count === 0) {
-        resolvedData.isAdmin = true;
-      }
-      return resolvedData;
-    }
-  }
+  hooks: userHooks
 });

@@ -1,4 +1,5 @@
 import { list } from '@keystone-6/core';
+import { Lists } from '.keystone/types';
 import {
   relationship,
   integer,
@@ -7,7 +8,7 @@ import {
 } from '@keystone-6/core/fields';
 import { bidAccess } from '../utils/access';
 
-export const Bid = list({
+export const Bid: Lists.Bid = list({
   fields: {
     created: timestamp({
       defaultValue: {kind: 'now'}
