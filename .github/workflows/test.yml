@@ -26,7 +26,8 @@ jobs:
       COOKIE_SECRET: test-secret
       DATABASE_TYPE: postgresql
       DATABASE_URL: postgres://db:db@localhost:5432/the_log_test
-      NODE_ENV: test:ci
+      NODE_ENV: test
+      TESTING: true
 
     steps:
       - uses: actions/checkout@v4
