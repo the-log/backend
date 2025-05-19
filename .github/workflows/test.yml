@@ -9,7 +9,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:15
+        image: postgres:14
         env:
           POSTGRES_USER: db
           POSTGRES_PASSWORD: db
@@ -26,7 +26,6 @@ jobs:
       COOKIE_SECRET: test-secret
       DATABASE_TYPE: postgresql
       DATABASE_URL: postgres://db:db@localhost:5432/the_log_test
-      NODE_ENV: test
       TESTING: true
 
     steps:
