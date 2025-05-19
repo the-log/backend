@@ -41,6 +41,13 @@ jobs:
         run: npm ci
         working-directory: .
 
+      - name: Wait for Postgres
+        run: |
+          for i in {1..20}; do
+            pg_isready -h localhost -p 5432 && break
+            sleep 2
+          done
+
       - name: Run tests
         run: npm run test:ci
         working-directory: .
