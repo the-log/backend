@@ -13,7 +13,7 @@
     "import-contracts": "tsx scripts/contracts/index.ts",
     "migrate:test": "dotenv -e test.env -- prisma migrate deploy",
     "migrate:status": "dotenv -e test.env -- prisma migrate status --schema ./schema.prisma",
-    "test": "npm run migrate:test && DOTENV_CONFIG_PATH=./test.env jest",
+    "test": "npm run migrate:test && DOTENV_CONFIG_PATH=./test.env jest"
   },
   "dependencies": {
     "@keystone-6/auth": "^8.0",
