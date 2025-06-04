@@ -26,21 +26,21 @@ export async function deleteAllData() {
   try {
     for (const listKey of listKeys) {
       if (sudo.db[listKey]) {
-        const items = await sudo.db[listKey].findMany({}).catch(() => []);
+        const items = await sudo.db[listKey].findMany({}).catch((): any[] => []);
         for (const item of items) {
           try {
             await sudo.db[listKey].deleteOne({ where: { id: item.id } });
-          } catch (err) {
+          } catch (err: any) {
             console.log(`Warning: Failed to delete ${listKey} with ID ${item.id}. Continuing...`);
           }
         }
       }
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error(`Error in deleteAllData: ${error}`);
   } finally {
     // Always ensure connection is closed
-    await sudo.prisma.$disconnect().catch(e => console.error(`Error disconnecting: ${e}`));
+    await sudo.prisma.$disconnect().catch((e: Error) => console.error(`Error disconnecting: ${e}`));
   }
 }
 
@@ -153,7 +153,7 @@ export function runAccessControlTests(options: AccessTestOptions) {
         await Promise.allSettled([
           sudo.prisma.$disconnect(),
           context.prisma.$disconnect()
-        ])
+        ]);
       });
 
       it(`${name} - update`, async () => {
@@ -173,7 +173,7 @@ export function runAccessControlTests(options: AccessTestOptions) {
         await Promise.allSettled([
           sudo.prisma.$disconnect(),
           context.prisma.$disconnect()
-        ])
+        ]);
       });
 
       it(`${name} - delete`, async () => {
@@ -193,7 +193,7 @@ export function runAccessControlTests(options: AccessTestOptions) {
         await Promise.allSettled([
           sudo.prisma.$disconnect(),
           context.prisma.$disconnect()
-        ])
+        ]);
       });
     });
   });

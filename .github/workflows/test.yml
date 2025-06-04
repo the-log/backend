@@ -44,8 +44,18 @@ jobs:
         run: |
           for i in {1..20}; do
             pg_isready -h localhost -p 5432 && break
-            sleep 2
+            sleep 1
           done
+          pg_isready -h localhost -p 5432
+          if [ $? -ne 0 ]; then
+            echo "Failed waiting for PostgreSQL" && exit 1
+          fi
+
+      - name: Setup PostgreSQL for tests
+        run: |
+          echo "Creating root user for PostgreSQL..."
+          PGPASSWORD=db psql -h localhost -U db -d the_log_test -c "CREATE USER root WITH PASSWORD 'root' SUPERUSER;"
+          echo "PostgreSQL root user created successfully"
 
       - name: Debug Environment Variables
         run: |
@@ -63,5 +73,5 @@ jobs:
           fi
 
       - name: Run tests
-        run: npm run test:ci
+        run: npm run test:ci -- --require=./tests/db-debug.ts
         working-directory: .
