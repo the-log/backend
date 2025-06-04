@@ -3,9 +3,12 @@ import config from '../keystone';
 import * as PrismaModule from '@prisma/client';
 import { deleteAllData, runAccessControlTests } from './testUtils';
 
+import { getUniqueValue } from './testUtils';
+
+const uniqueEmail = `test+${getUniqueValue()}@example.com`;
 runAccessControlTests({
   listKey: 'User',
-  validCreateData: { name: 'Test', email: 'test@example.com', password: 'password123' },
+  validCreateData: { name: 'Test', email: uniqueEmail, password: 'password123' },
   updateData: { name: 'Updated' },
   sessionScenarios: [
     { name: 'Admin', session: { data: { isAdmin: true } }, canCreate: true, canRead: true, canUpdate: true, canDelete: true },

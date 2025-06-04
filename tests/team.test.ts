@@ -3,9 +3,17 @@ import config from '../keystone';
 import * as PrismaModule from '@prisma/client';
 import { deleteAllData, runAccessControlTests } from './testUtils';
 
+import { getUniqueValue } from './testUtils';
+
+const uniqueEspnId = parseInt(getUniqueValue('espn_id_'));
+const uniqueAbbr = `TST${getUniqueValue()}`;
+const uniqueName = `Test ${getUniqueValue()}`;
+
+import { sanitizeEspnIdValue } from './testUtils';
+
 runAccessControlTests({
   listKey: 'Team',
-  validCreateData: { name: 'Test', abbreviation: 'TST', espn_id: 1 },
+  validCreateData: { name: uniqueName, abbreviation: uniqueAbbr, espn_id: sanitizeEspnIdValue(uniqueEspnId) },
   updateData: { name: 'Updated' },
   sessionScenarios: [
     { name: 'Admin', session: { data: { isAdmin: true } }, canCreate: true, canRead: true, canUpdate: true, canDelete: true },

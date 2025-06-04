@@ -4,6 +4,20 @@ import config from '../keystone';
 import * as PrismaModule from '@prisma/client';
 import keystone from '../keystone';
 
+// Unique value generators for tests
+let uniqueCounter = 0;
+let uniqueIntCounter = 0;
+export function getUniqueValue(prefix = ''): string {
+  uniqueCounter++;
+  return `${prefix}${Date.now()}_${uniqueCounter}_${Math.floor(Math.random() * 10000)}`;
+}
+export function getUniqueInt(): number {
+  uniqueIntCounter++;
+  // Always stays below 2_000_000_000
+  return (Math.floor(Math.random() * 1_000_000_000) + uniqueIntCounter) % 2147483647;
+}
+
+
 // Get all list keys programmatically
 const listKeys = Object.keys(config.lists);
 
@@ -35,24 +49,35 @@ type AccessTestOptions = {
 };
 
 export async function ensurePlayer(context: any, playerData: Partial<any> = {}) {
-  const defaults = { name: 'Test Player', espn_id: 1 };
-  const data = { ...defaults, ...playerData };
+  const uniqueEspnId = playerData.espn_id ?? getUniqueInt();
+  const uniqueName = playerData.name ?? `Test Player ${getUniqueValue()}`;
+  const data = { name: uniqueName, espn_id: uniqueEspnId, ...playerData };
   let player = await context.db.Player.findMany({ where: { espn_id: { equals: data.espn_id } } });
   if (player.length > 0) return player[0];
   return await context.db.Player.createOne({ data });
 }
 
+export function sanitizeEspnIdValue(value: any): number {
+  return typeof value === 'number' && !isNaN(value) ? value : getUniqueInt();
+}
+
 export async function ensureTeam(context: any, teamData: Partial<any> = {}) {
-  const defaults = { name: 'Test Team', abbreviation: 'TST', espn_id: 1 };
-  const data = { ...defaults, ...teamData };
+  const uniqueEspnId =
+    typeof teamData.espn_id === 'number' && !isNaN(teamData.espn_id)
+      ? teamData.espn_id
+      : getUniqueInt();
+  const uniqueAbbr = teamData.abbreviation ?? `TST${getUniqueValue()}`;
+  const uniqueName = teamData.name ?? `Test Team ${getUniqueValue()}`;
+  const data = { name: uniqueName, abbreviation: uniqueAbbr, espn_id: uniqueEspnId, ...teamData };
   let team = await context.db.Team.findMany({ where: { abbreviation: { equals: data.abbreviation } } });
   if (team.length > 0) return team[0];
   return await context.db.Team.createOne({ data });
 }
 
 export async function ensureUser(context: any, userData: Partial<any> = {}) {
-  const defaults = { name: 'Test User', email: 'testuser@example.com', password: 'password123', isOwner: true };
-  const data = { ...defaults, ...userData };
+  const uniqueEmail = userData.email ?? `testuser+${getUniqueValue()}@example.com`;
+  const uniqueName = userData.name ?? `Test User ${getUniqueValue()}`;
+  const data = { name: uniqueName, email: uniqueEmail, password: 'password123', isOwner: true, ...userData };
   let user = await context.db.User.findMany({ where: { email: { equals: data.email } } });
   if (user.length > 0) return user[0];
   return await context.db.User.createOne({ data });
