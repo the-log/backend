@@ -1,4 +1,4 @@
-import { list } from '@keystone-6/core';
+import { list, graphql } from '@keystone-6/core';
 import {
   integer,
   select,
@@ -37,6 +37,30 @@ export const Contract = list({
         { label: 'Injured Reserve', value: 'ir' },
         { label: 'Restricted Free Agent', value: 'rfa' },
       ],
+      access: {
+        update: ({ session, inputData, item }) => {
+
+          // Admins can always update
+          if (session?.data?.isAdmin) return true;
+
+          // Owners can update their own contracts in limited ways
+          if (item?.teamId && session?.data?.team?.id === item.teamId) {
+            const allowedUpdates = new Map([
+              ['active', ['ir', 'waived']],
+              ['dts', ['waived', 'active']],
+              ['ir', ['waived']],
+            ]);
+
+            const allowed = allowedUpdates.get(item.status);
+            if (allowed?.includes(inputData.status)) {
+              return true;
+            }
+          }
+
+          // All else fails
+          return false;
+        }
+      }
     }),
     team: relationship({
       ref: 'Team.contracts',

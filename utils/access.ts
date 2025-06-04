@@ -1,9 +1,6 @@
-import {
-  ListAccessControl,
-  BaseListTypeInfo,
-} from "@keystone-6/core/types";
+import { ListAccessControl } from "@keystone-6/core/types";
 
-export const readOnly: ListAccessControl<BaseListTypeInfo> = {
+export const readOnly: ListAccessControl<any> = {
   operation: {
     query: ({session}) => true,
     create: ({ session }) => (session?.data.isAdmin),
@@ -12,7 +9,7 @@ export const readOnly: ListAccessControl<BaseListTypeInfo> = {
   }
 };
 
-export const bidAccess: ListAccessControl<BaseListTypeInfo> = {
+export const bidAccess: ListAccessControl<any> = {
   operation: {
     query: ({ session }) => Boolean(session?.data.isOwner),
     create: ({ session }) => Boolean(session?.data.isOwner),
@@ -67,72 +64,72 @@ export const bidAccess: ListAccessControl<BaseListTypeInfo> = {
   }
 };
 
-export const contractAccess: ListAccessControl<BaseListTypeInfo> = {
+export const contractAccess: ListAccessControl<any> = {
   operation: {
-    query: ({ session }) => Boolean(session),
-    create: ({ session }) => (session?.data.isAdmin),
-    update: ({ session }) => (session?.data.isOwner),
-    delete: ({ session }) => (session?.data.isOwner),
+    query: ({ session }) => Boolean(session?.data),
+    create: ({ session }) => Boolean(session?.data?.isAdmin),
+    update: ({ session }) => Boolean(session?.data?.isOwner || session?.data?.isAdmin),
+    delete: ({ session }) => Boolean(session?.data?.isOwner || session?.data?.isAdmin),
   },
   item: {
-    update: ({ session, item }) => (
-      session.data.isAdmin ||
-      item.teamId === session.data.team.id
+    update: ({ session, item }) => Boolean(
+      session?.data?.isAdmin ||
+      item.teamId === session?.data?.team?.id
     ),
-    delete: ({ session, item }) => (
-      session.data.isAdmin ||
-      (item.status === 'dts' && item.teamId === session.data.team.id)
+    delete: ({ session, item }) => Boolean(
+      session?.data?.isAdmin ||
+      (item.status === 'dts' && item.teamId === session?.data?.team?.id)
     )
   }
 };
 
-export const draftPickAccess: ListAccessControl<BaseListTypeInfo> = {
+export const draftPickAccess: ListAccessControl<any> = {
   operation: {
-    query: ({ session }) => Boolean(session),
-    create: ({ session }) => (session?.data.isAdmin),
-    update: ({ session }) => (session?.data.isAdmin),
-    delete: ({ session }) => (session?.data.isAdmin),
+    query: ({ session }) => Boolean(session?.data),
+    create: ({ session }) => Boolean(session?.data?.isAdmin),
+    update: ({ session }) => Boolean(session?.data?.isAdmin),
+    delete: ({ session }) => Boolean(session?.data?.isAdmin),
   }
 };
 
-export const playerAccess: ListAccessControl<BaseListTypeInfo> = {
+export const playerAccess: ListAccessControl<any> = {
   operation: {
-    query: ({ session }) => Boolean(session),
-    create: ({ session }) => (session?.data.isAdmin),
-    update: ({ session }) => (session?.data.isAdmin),
-    delete: ({ session }) => (session?.data.isAdmin),
+    query: ({ session }) => Boolean(session?.data),
+    create: ({ session }) => Boolean(session?.data?.isAdmin),
+    update: ({ session }) => Boolean(session?.data?.isAdmin),
+    delete: ({ session }) => Boolean(session?.data?.isAdmin),
   }
 };
 
-export const teamAccess: ListAccessControl<BaseListTypeInfo> = {
+export const teamAccess: ListAccessControl<any> = {
   operation: {
-    query: ({ session }) => Boolean(session),
-    create: ({ session }) => (session?.data.isAdmin),
-    update: ({ session }) => (session?.data.isAdmin),
-    delete: ({ session }) => (session?.data.isAdmin),
+    query: ({ session }) => Boolean(session?.data),
+    create: ({ session }) => Boolean(session?.data?.isAdmin),
+    update: ({ session }) => Boolean(session?.data?.isAdmin),
+    delete: ({ session }) => Boolean(session?.data?.isAdmin),
   }
 };
 
-export const tradeAccess: ListAccessControl<BaseListTypeInfo> = {
+export const tradeAccess: ListAccessControl<any> = {
   operation: {
-    query: ({ session }) => Boolean(session),
-    create: ({ session }) => Boolean(session),
-    update: ({ session }) => Boolean(session),
-    delete: ({ session }) => Boolean(session),
+    query: ({ session }) => Boolean(session?.data),
+    create: ({ session }) => Boolean(session?.data?.isAdmin),
+    update: ({ session }) => Boolean(session?.data?.isAdmin),
+    delete: ({ session }) => Boolean(session?.data?.isAdmin),
   }
 };
 
-export const userAccess: ListAccessControl<BaseListTypeInfo> = {
+export const userAccess: ListAccessControl<any> = {
   operation: {
-    query: ({ session }) => Boolean(session),
-    create: ({ session }) => (session?.data.isAdmin),
-    update: ({ session }) => (session?.data.isAdmin),
-    delete: ({ session }) => (session?.data.isAdmin),
+    query: ({ session }) => Boolean(session?.data),
+    create: ({ session }) => Boolean(session?.data?.isAdmin),
+    update: ({ session }) => Boolean(session?.data), // Users can update own info
+    delete: ({ session }) => Boolean(session?.data?.isAdmin),
   },
   item: {
     update: ({session, item}) => {
-      const isOwnUser = (session?.itemId || false) === item.id;
-      const isAdmin = session?.data.isAdmin || false;
+      const isOwnUser = (session?.itemId === item.id);
+      const isAdmin = Boolean(session?.data?.isAdmin);
       return (isOwnUser || isAdmin);
     }
   }

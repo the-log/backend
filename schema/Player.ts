@@ -8,6 +8,7 @@ import {
   json,
 } from '@keystone-6/core/fields';
 import { playerAccess } from '../utils/access';
+import { playerHooks } from '../utils/hooks';
 
 export const Player = list({
   fields: {
@@ -70,4 +71,5 @@ export const Player = list({
     }),
   },
   access: playerAccess,
+  hooks: playerHooks,
 });
