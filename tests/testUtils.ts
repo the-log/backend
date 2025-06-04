@@ -54,7 +54,11 @@ export async function ensurePlayer(context: any, playerData: Partial<any> = {}) 
   const data = { name: uniqueName, espn_id: uniqueEspnId, ...playerData };
   let player = await context.db.Player.findMany({ where: { espn_id: { equals: data.espn_id } } });
   if (player.length > 0) return player[0];
-  return await context.db.Player.createOne({ data });
+  const createdPlayer = await context.db.Player.createOne({ data });
+  if (!createdPlayer || !createdPlayer.id) {
+    throw new Error(`Failed to create Player in ensurePlayer. Data: ${JSON.stringify(data)}`);
+  }
+  return createdPlayer;
 }
 
 export function sanitizeEspnIdValue(value: any): number {
@@ -71,7 +75,11 @@ export async function ensureTeam(context: any, teamData: Partial<any> = {}) {
   const data = { name: uniqueName, abbreviation: uniqueAbbr, espn_id: uniqueEspnId, ...teamData };
   let team = await context.db.Team.findMany({ where: { abbreviation: { equals: data.abbreviation } } });
   if (team.length > 0) return team[0];
-  return await context.db.Team.createOne({ data });
+  const createdTeam = await context.db.Team.createOne({ data });
+  if (!createdTeam || !createdTeam.id) {
+    throw new Error(`Failed to create Team in ensureTeam. Data: ${JSON.stringify(data)}`);
+  }
+  return createdTeam;
 }
 
 export async function ensureUser(context: any, userData: Partial<any> = {}) {
@@ -80,7 +88,11 @@ export async function ensureUser(context: any, userData: Partial<any> = {}) {
   const data = { name: uniqueName, email: uniqueEmail, password: 'password123', isOwner: true, ...userData };
   let user = await context.db.User.findMany({ where: { email: { equals: data.email } } });
   if (user.length > 0) return user[0];
-  return await context.db.User.createOne({ data });
+  const createdUser = await context.db.User.createOne({ data });
+  if (!createdUser || !createdUser.id) {
+    throw new Error(`Failed to create User in ensureUser. Data: ${JSON.stringify(data)}`);
+  }
+  return createdUser;
 }
 
 export function runAccessControlTests(options: AccessTestOptions) {
