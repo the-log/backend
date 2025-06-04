@@ -47,6 +47,21 @@ jobs:
             sleep 2
           done
 
+      - name: Debug Environment Variables
+        run: |
+          echo "DATABASE_URL: ${DATABASE_URL:0:10}... (${#DATABASE_URL} chars)"
+          echo "TESTING: ${TESTING:-not set}"
+          echo "COOKIE_SECRET: ${COOKIE_SECRET:+set but masked}"
+          echo "NODE_ENV: ${NODE_ENV:-not set}"
+          echo "PostgreSQL Version:"
+          psql --version || echo "psql not installed"
+          echo "Database Connectivity Test:"
+          if [ -n "$DATABASE_URL" ]; then
+            pg_isready -d "${DATABASE_URL}" || echo "Database connection failed"
+          else
+            echo "No DATABASE_URL provided"
+          fi
+
       - name: Run tests
         run: npm run test:ci
         working-directory: .

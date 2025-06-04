@@ -23,13 +23,24 @@ const listKeys = Object.keys(config.lists);
 
 export async function deleteAllData() {
   const sudo = getContext(config, PrismaModule).sudo();
-  for (const listKey of listKeys) {
-    if (sudo.db[listKey]) {
-      const items = await sudo.db[listKey].findMany({}).catch(() => []);
-      for (const item of items) {
-        await sudo.db[listKey].deleteOne({ where: { id: item.id } });
+  try {
+    for (const listKey of listKeys) {
+      if (sudo.db[listKey]) {
+        const items = await sudo.db[listKey].findMany({}).catch(() => []);
+        for (const item of items) {
+          try {
+            await sudo.db[listKey].deleteOne({ where: { id: item.id } });
+          } catch (err) {
+            console.log(`Warning: Failed to delete ${listKey} with ID ${item.id}. Continuing...`);
+          }
+        }
       }
     }
+  } catch (error) {
+    console.error(`Error in deleteAllData: ${error}`);
+  } finally {
+    // Always ensure connection is closed
+    await sudo.prisma.$disconnect().catch(e => console.error(`Error disconnecting: ${e}`));
   }
 }
 
