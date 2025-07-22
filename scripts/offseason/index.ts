@@ -233,16 +233,19 @@ async function createDraftOrder() {
       rankCalculatedFinal: "asc"
     },
     take: 6
-  });
+  }) as any[];
+
 
   const pretenders = await db.Team.findMany({
     orderBy: {
       playoffSeed: "desc"
     },
      take: 4
-  })
+  });
 
-  const teams = [...pretenders, ...contenders.toReversed()];
+  let teams = contenders;
+  teams.reverse();
+  teams.unshift(...pretenders);
 
   const order = teams.map(({id, espn_id, name}) => ({
     id,
