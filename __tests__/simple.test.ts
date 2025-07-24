@@ -6,7 +6,7 @@ describe('Jest Configuration', () => {
 
   it('should have access to environment variables', () => {
     expect(process.env.DATABASE_TYPE).toBe('sqlite');
-    expect(process.env.DATABASE_URL).toBe('file:./test.db');
+    expect(process.env.DATABASE_URL).toBe('file:./test.db?connection_limit=1');
   });
 
   it('should be able to import Keystone modules', async () => {
