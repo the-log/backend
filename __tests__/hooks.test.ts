@@ -1,5 +1,10 @@
 import { contractHooks } from '../utils/hooks';
 
+// Type guard to check if hooks is an object with afterOperation
+function hasAfterOperation(hooks: any): hooks is { afterOperation: Function } {
+  return typeof hooks === 'object' && hooks !== null && 'afterOperation' in hooks;
+}
+
 describe('Contract Hooks', () => {
   describe('afterOperation', () => {
     it('should create log entry for new contract', async () => {
@@ -24,12 +29,14 @@ describe('Contract Hooks', () => {
         playerId: 'player123'
       };
 
-      await contractHooks.afterOperation({
-        operation: 'create',
-        originalItem: null,
-        item,
-        context: mockContext
-      });
+      if (hasAfterOperation(contractHooks)) {
+        await contractHooks.afterOperation({
+          operation: 'create',
+          originalItem: null,
+          item,
+          context: mockContext
+        });
+      }
 
       expect(createOneMock).toHaveBeenCalledWith({
         data: {
@@ -71,12 +78,14 @@ describe('Contract Hooks', () => {
         playerId: 'player123'
       };
 
-      await contractHooks.afterOperation({
-        operation: 'update',
-        originalItem,
-        item,
-        context: mockContext
-      });
+      if (hasAfterOperation(contractHooks)) {
+        await contractHooks.afterOperation({
+          operation: 'update',
+          originalItem,
+          item,
+          context: mockContext
+        });
+      }
 
       expect(createOneMock).toHaveBeenCalledWith({
         data: {
@@ -111,12 +120,14 @@ describe('Contract Hooks', () => {
         playerId: 'player123'
       };
 
-      await contractHooks.afterOperation({
-        operation: 'delete',
-        originalItem,
-        item: null,
-        context: mockContext
-      });
+      if (hasAfterOperation(contractHooks)) {
+        await contractHooks.afterOperation({
+          operation: 'delete',
+          originalItem,
+          item: null,
+          context: mockContext
+        });
+      }
 
       expect(createOneMock).toHaveBeenCalledWith({
         data: {

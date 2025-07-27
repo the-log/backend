@@ -16,6 +16,7 @@ module.exports = {
     'utils/**/*.ts',
     '!**/*.d.ts',
   ],
+  setupFilesAfterEnv: ['<rootDir>/test-setup.ts'],
   testTimeout: 60000,
   maxWorkers: 1,
   setupFiles: ['<rootDir>/jest.env.js'],

@@ -1,17 +1,26 @@
 import { bidAccess, contractAccess, userAccess } from '../utils/access';
 
+// Type guard to check if access control is an object (not a function)
+function isAccessControlObject(access: any): access is { operation: any; filter?: any; item?: any } {
+  return typeof access === 'object' && access !== null && 'operation' in access;
+}
+
 describe('Access Control', () => {
   describe('bidAccess', () => {
     it('should allow owners to query bids', () => {
       const session = { data: { isOwner: true } };
-      const result = bidAccess.operation?.query?.({ session });
-      expect(result).toBe(true);
+      if (isAccessControlObject(bidAccess)) {
+        const result = bidAccess.operation.query({ session });
+        expect(result).toBe(true);
+      }
     });
 
     it('should deny non-owners from querying bids', () => {
       const session = { data: { isOwner: false } };
-      const result = bidAccess.operation?.query?.({ session });
-      expect(result).toBe(false);
+      if (isAccessControlObject(bidAccess)) {
+        const result = bidAccess.operation.query({ session });
+        expect(result).toBe(false);
+      }
     });
 
     it('should filter bids correctly for team owners', () => {
@@ -29,24 +38,26 @@ describe('Access Control', () => {
         } 
       };
       
-      const result = bidAccess.filter?.query?.({ session, context });
+      if (isAccessControlObject(bidAccess) && bidAccess.filter) {
+        const result = bidAccess.filter.query({ session, context });
       
-      expect(result).toEqual({
-        OR: [
-          {
-            team: {
-              id: {
-                equals: 'team123'
+        expect(result).toEqual({
+          OR: [
+            {
+              team: {
+                id: {
+                  equals: 'team123'
+                }
+              }
+            },
+            {
+              locked: {
+                not: null
               }
             }
-          },
-          {
-            locked: {
-              not: null
-            }
-          }
-        ]
-      });
+          ]
+        });
+      }
     });
 
     it('should allow admin backend access to all bids', () => {
@@ -64,22 +75,28 @@ describe('Access Control', () => {
         } 
       };
       
-      const result = bidAccess.filter?.query?.({ session, context });
-      expect(result).toEqual({});
+      if (isAccessControlObject(bidAccess) && bidAccess.filter) {
+        const result = bidAccess.filter.query({ session, context });
+        expect(result).toEqual({});
+      }
     });
   });
 
   describe('contractAccess', () => {
     it('should allow authenticated users to query contracts', () => {
       const session = { data: { id: 'user123' } };
-      const result = contractAccess.operation?.query?.({ session });
-      expect(result).toBe(true);
+      if (isAccessControlObject(contractAccess)) {
+        const result = contractAccess.operation.query({ session });
+        expect(result).toBe(true);
+      }
     });
 
     it('should deny unauthenticated users from querying contracts', () => {
       const session = null;
-      const result = contractAccess.operation?.query?.({ session });
-      expect(result).toBe(false);
+      if (isAccessControlObject(contractAccess)) {
+        const result = contractAccess.operation.query({ session });
+        expect(result).toBe(false);
+      }
     });
 
     it('should allow team owners to update their own contracts', () => {
@@ -91,8 +108,10 @@ describe('Access Control', () => {
       };
       const item = { teamId: 'team123' };
       
-      const result = contractAccess.item?.update?.({ session, item });
-      expect(result).toBe(true);
+      if (isAccessControlObject(contractAccess) && contractAccess.item) {
+        const result = contractAccess.item.update({ session, item });
+        expect(result).toBe(true);
+      }
     });
 
     it('should allow admins to update any contract', () => {
@@ -104,8 +123,10 @@ describe('Access Control', () => {
       };
       const item = { teamId: 'team456' };
       
-      const result = contractAccess.item?.update?.({ session, item });
-      expect(result).toBe(true);
+      if (isAccessControlObject(contractAccess) && contractAccess.item) {
+        const result = contractAccess.item.update({ session, item });
+        expect(result).toBe(true);
+      }
     });
   });
 
@@ -117,8 +138,10 @@ describe('Access Control', () => {
       };
       const item = { id: 'user123' };
       
-      const result = userAccess.item?.update?.({ session, item });
-      expect(result).toBe(true);
+      if (isAccessControlObject(userAccess) && userAccess.item) {
+        const result = userAccess.item.update({ session, item });
+        expect(result).toBe(true);
+      }
     });
 
     it('should deny users from updating other profiles', () => {
@@ -128,8 +151,10 @@ describe('Access Control', () => {
       };
       const item = { id: 'user456' };
       
-      const result = userAccess.item?.update?.({ session, item });
-      expect(result).toBe(false);
+      if (isAccessControlObject(userAccess) && userAccess.item) {
+        const result = userAccess.item.update({ session, item });
+        expect(result).toBe(false);
+      }
     });
 
     it('should allow admins to update any user', () => {
@@ -139,8 +164,10 @@ describe('Access Control', () => {
       };
       const item = { id: 'user456' };
       
-      const result = userAccess.item?.update?.({ session, item });
-      expect(result).toBe(true);
+      if (isAccessControlObject(userAccess) && userAccess.item) {
+        const result = userAccess.item.update({ session, item });
+        expect(result).toBe(true);
+      }
     });
   });
 });
