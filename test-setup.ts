@@ -23,6 +23,29 @@ export const getTestContext = () => {
   }
 };
 
+// Create test context with admin session
+export const getAdminContext = () => {
+  try {
+    const context = getContext(config, PrismaModule);
+    // Create admin session for tests
+    const adminSession = {
+      itemId: 'test-admin-id',
+      data: {
+        id: 'test-admin-id',
+        name: 'Test Admin',
+        email: 'admin@test.com',
+        isAdmin: true,
+        isOwner: true,
+        team: null
+      }
+    };
+    return context.withSession(adminSession);
+  } catch (error) {
+    console.warn('Admin context creation failed:', error);
+    return null;
+  }
+};
+
 // Test data factories
 export const createTestUser = async (context: any, userData: any = {}) => {
   const defaultData = {
@@ -34,7 +57,10 @@ export const createTestUser = async (context: any, userData: any = {}) => {
     ...userData
   };
   
-  return await context.query.User.createOne({ data: defaultData });
+  return await context.query.User.createOne({ 
+    data: defaultData,
+    query: 'id name email isAdmin isOwner'
+  });
 };
 
 export const createTestTeam = async (context: any, teamData: any = {}) => {
@@ -45,7 +71,10 @@ export const createTestTeam = async (context: any, teamData: any = {}) => {
     ...teamData
   };
   
-  return await context.query.Team.createOne({ data: defaultData });
+  return await context.query.Team.createOne({ 
+    data: defaultData,
+    query: 'id name abbreviation espn_id'
+  });
 };
 
 export const createTestPlayer = async (context: any, playerData: any = {}) => {

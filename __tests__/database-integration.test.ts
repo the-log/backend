@@ -1,8 +1,8 @@
-import { getTestContext, createTestUser, createTestTeam } from '../test-setup';
+import { getAdminContext, createTestUser, createTestTeam } from '../test-setup';
 
 describe('Database Integration Tests', () => {
   it('should create and query users', async () => {
-    const context = getTestContext();
+    const context = getAdminContext();
     
     if (!context) {
       console.warn('Context not available, skipping test');
@@ -34,7 +34,7 @@ describe('Database Integration Tests', () => {
   });
 
   it('should handle first user admin assignment', async () => {
-    const context = getTestContext();
+    const context = getAdminContext();
     
     if (!context) {
       console.warn('Context not available, skipping test');
@@ -63,7 +63,7 @@ describe('Database Integration Tests', () => {
   });
 
   it('should create teams with required fields', async () => {
-    const context = getTestContext();
+    const context = getAdminContext();
     
     if (!context) {
       console.warn('Context not available, skipping test');
