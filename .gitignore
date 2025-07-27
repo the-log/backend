@@ -1,6 +1,8 @@
 node_modules
 .keystone
 keystone.db
+test.db
+test.db-journal
 *.log
 *.env
 schema.prisma

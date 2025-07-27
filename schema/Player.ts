@@ -44,10 +44,7 @@ export const Player = list({
     positionRankProj: integer(),
     overallRankProj: integer(),
     seasonOutlook: text({
-      db: {
-        nativeType: 'Text',
-        isNullable: true,
-      },
+      db: process.env.DATABASE_TYPE === 'postgresql' ? { nativeType: 'Text' } : undefined,
     }),
     outlooksByWeek: json(),
     isRookie: checkbox(),

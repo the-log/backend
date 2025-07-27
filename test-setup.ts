@@ -1,5 +1,6 @@
 import { resetDatabase } from '@keystone-6/core/testing';
 import { getContext } from '@keystone-6/core/context';
+import * as PrismaModule from '.prisma/client';
 import config from './keystone';
 
 // Reset database before each test
@@ -15,8 +16,7 @@ beforeEach(async () => {
 // Create test context helper  
 export const getTestContext = () => {
   try {
-    // @ts-ignore - Temporarily ignore type issues while we work on them
-    return getContext(config);
+    return getContext(config, PrismaModule);
   } catch (error) {
     console.warn('Context creation failed:', error);
     return null;
