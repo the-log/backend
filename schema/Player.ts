@@ -9,6 +9,8 @@ import {
 } from '@keystone-6/core/fields';
 import { playerAccess } from '../utils/access';
 
+const isPsql = process.env.DATABASE_TYPE === 'postgresql';
+
 export const Player = list({
   fields: {
     espn_id: integer({
@@ -44,10 +46,7 @@ export const Player = list({
     positionRankProj: integer(),
     overallRankProj: integer(),
     seasonOutlook: text({
-      db: {
-        nativeType: 'Text',
-        isNullable: true,
-      },
+      db: isPsql ? { nativeType: 'Text', isNullable: true } : undefined,
     }),
     outlooksByWeek: json(),
     isRookie: checkbox(),

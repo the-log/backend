@@ -10,7 +10,10 @@
     "scrape": "tsx scripts/scraper/index.ts",
     "offseason": "tsx scripts/offseason/index.ts",
     "free-agency": "tsx scripts/free_agency/index.ts",
-    "import-contracts": "tsx scripts/contracts/index.ts"
+    "import-contracts": "tsx scripts/contracts/index.ts",
+    "test:build": "rm -f schema.prisma && dotenv -e .env.test -- keystone build --no-ui",
+    "test": "npm run test:build && jest",
+    "test:watch": "jest --watch"
   },
   "dependencies": {
     "@keystone-6/auth": "^8.0",
@@ -24,7 +27,11 @@
     "node": "^14.15 || ^16.13 || ^18.7.0"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.0",
     "@types/nodemailer": "^6.4.15",
+    "dotenv-cli": "^9.0.0",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
     "tsx": "^4.9.4"
   }
 }

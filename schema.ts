@@ -1,4 +1,3 @@
-import { Lists } from '.keystone/types';
 import { Bid } from './schema/Bid';
 import { Contract } from "./schema/Contract";
 import { ContractLogEntry } from "./schema/ContractLogEntry";
@@ -8,9 +7,8 @@ import { Team } from "./schema/Team";
 import { Trade } from "./schema/Trade";
 import { User } from "./schema/User";
 import { LeagueSetting } from "./schema/LeagueSetting";
-import { list } from '@keystone-6/core';
 
-export const lists: Lists = {
+export const lists = {
   Bid,
   Contract,
   ContractLogEntry,
