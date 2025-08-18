@@ -59,10 +59,11 @@ export const bidAccess: ListAccessControl<BaseListTypeInfo> = {
       return !isLocked && isOwnBid;
     },
     delete: ({ session, item }) => {
+      const isAdmin = session?.data.isAdmin
       const isOwnBid = session?.data?.team?.id === item?.teamId
       const isLocked = Boolean(item?.locked)
 
-      return !isLocked && isOwnBid;
+      return (!isLocked && isOwnBid) || isAdmin;
     }
   }
 };
