@@ -6,6 +6,7 @@ import {
   float,
   checkbox,
   json,
+  timestamp,
 } from '@keystone-6/core/fields';
 import { playerAccess } from '../utils/access';
 
@@ -64,6 +65,9 @@ export const Player = list({
       isIndexed: true,
     }),
     splits: json(),
+    lastSeenInEspn: timestamp({
+      defaultValue: { kind: 'now' },
+    }),
     contract: relationship({
       ref: 'Contract.player'
     }),

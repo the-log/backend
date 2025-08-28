@@ -127,7 +127,7 @@ export const shapePlayerData = (rawData: CombinedData[], year: number) => {
           thisWeekProjected: {}
         };
 
-        for (const statSet of (fantasy.player.stats as StatSet[])) {
+        for (const statSet of ((fantasy.player.stats || []) as StatSet[])) {
           const week = statSet.scoringPeriodId;
           const last = year - 1;
 
@@ -230,10 +230,11 @@ export const updatePlayerData = async (year: number, db: KeystoneDbAPI<any>) => 
     }
   }
 
-  const shapedPlayerData = shapePlayerData(rawPlayerData, year)
+  const shapedPlayerData = shapePlayerData(rawPlayerData, year);
 
   const playersToUpdate = shapedPlayerData.filter(player => existingIds.includes(player.espn_id))
   const playersToInsert = shapedPlayerData.filter(player => !existingIds.includes(player.espn_id))
+
   const batchSize = 100;
 
   while (playersToUpdate.length) {
@@ -242,7 +243,10 @@ export const updatePlayerData = async (year: number, db: KeystoneDbAPI<any>) => 
     await db.Player.updateMany({
       data: batch.map(player => ({
         where: { espn_id: player.espn_id },
-        data: player
+        data: {
+          ...player,
+          lastSeenInEspn: new Date(),
+        }
       }))
     });
   }
@@ -251,8 +255,10 @@ export const updatePlayerData = async (year: number, db: KeystoneDbAPI<any>) => 
     const batch = playersToInsert.splice(0, batchSize);
 
     await db.Player.createMany({
-      data: batch
+      data: batch.map(player => ({
+        ...player,
+        lastSeenInEspn: new Date(),
+      }))
     });
   }
-
 }
