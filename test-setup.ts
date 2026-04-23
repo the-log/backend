@@ -82,6 +82,39 @@ export const createTestContract = async (context: KeystoneContext, contractData:
   return await context.query.Contract.createOne({ data: defaultData });
 };
 
+export const createTestBid = async (context: KeystoneContext, bidData: any = {}) => {
+  const defaultData = {
+    salary: 5000,
+    years: 2,
+    ...bidData
+  };
+
+  return await context.query.Bid.createOne({ data: defaultData });
+};
+
+// Creates a real admin User row in the test DB and returns a Keystone context
+// whose session.itemId points at that user. Needed whenever a test creates a
+// Contract, because Contract's afterOperation hook writes a ContractLogEntry
+// that `connect`s to the session user — the fake id in getAdminContext() fails.
+export const setupAdminContext = async () => {
+  const seedContext = getAdminContext();
+  const admin = await createTestUser(seedContext, {
+    name: 'Test Admin (seeded)',
+    email: `admin-${Date.now()}-${Math.random()}@test.com`,
+  });
+  return getContextWithSession({
+    itemId: admin.id,
+    data: {
+      id: admin.id,
+      name: admin.name,
+      email: admin.email,
+      isAdmin: true,
+      isOwner: true,
+      team: null,
+    },
+  });
+};
+
 // Session helpers
 export const createAdminSession = (user: any, team?: any) => ({
   itemId: user.id,

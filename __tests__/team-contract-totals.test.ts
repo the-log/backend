@@ -1,7 +1,5 @@
 import {
-  getAdminContext,
-  getContextWithSession,
-  createTestUser,
+  setupAdminContext,
   createTestTeam,
   createTestPlayer,
 } from '../test-setup';
@@ -9,28 +7,6 @@ import { KeystoneContext } from '@keystone-6/core/types';
 
 let espnIdCounter = 1;
 const nextEspnId = () => espnIdCounter++;
-
-// The Contract afterOperation hook writes a ContractLogEntry and connects it
-// to the session user — the session.itemId must point at a real User row or
-// the connect fails. Create one and return a context bound to its session.
-async function setupAdminContext() {
-  const seedContext = getAdminContext();
-  const admin = await createTestUser(seedContext, {
-    name: 'Contract Totals Admin',
-    email: `admin-${Date.now()}-${Math.random()}@test.com`,
-  });
-  return getContextWithSession({
-    itemId: admin.id,
-    data: {
-      id: admin.id,
-      name: admin.name,
-      email: admin.email,
-      isAdmin: true,
-      isOwner: true,
-      team: null,
-    },
-  });
-}
 
 async function seedContract(
   context: KeystoneContext,
