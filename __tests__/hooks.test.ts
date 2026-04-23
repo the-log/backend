@@ -1,9 +1,6 @@
-import { contractHooks } from '../utils/hooks';
+import { contractHooks as contractHooksRaw } from '../utils/hooks';
 
-// Type guard to check if hooks is an object with afterOperation
-function hasAfterOperation(hooks: any): hooks is { afterOperation: Function } {
-  return typeof hooks === 'object' && hooks !== null && 'afterOperation' in hooks;
-}
+const contractHooks = contractHooksRaw as any;
 
 describe('Contract Hooks', () => {
   describe('afterOperation', () => {
@@ -29,14 +26,12 @@ describe('Contract Hooks', () => {
         playerId: 'player123'
       };
 
-      if (hasAfterOperation(contractHooks)) {
-        await contractHooks.afterOperation({
-          operation: 'create',
-          originalItem: null,
-          item,
-          context: mockContext
-        });
-      }
+      await contractHooks.afterOperation({
+        operation: 'create',
+        originalItem: null,
+        item,
+        context: mockContext
+      });
 
       expect(createOneMock).toHaveBeenCalledWith({
         data: {
@@ -78,14 +73,12 @@ describe('Contract Hooks', () => {
         playerId: 'player123'
       };
 
-      if (hasAfterOperation(contractHooks)) {
-        await contractHooks.afterOperation({
-          operation: 'update',
-          originalItem,
-          item,
-          context: mockContext
-        });
-      }
+      await contractHooks.afterOperation({
+        operation: 'update',
+        originalItem,
+        item,
+        context: mockContext
+      });
 
       expect(createOneMock).toHaveBeenCalledWith({
         data: {
@@ -120,14 +113,12 @@ describe('Contract Hooks', () => {
         playerId: 'player123'
       };
 
-      if (hasAfterOperation(contractHooks)) {
-        await contractHooks.afterOperation({
-          operation: 'delete',
-          originalItem,
-          item: null,
-          context: mockContext
-        });
-      }
+      await contractHooks.afterOperation({
+        operation: 'delete',
+        originalItem,
+        item: null,
+        context: mockContext
+      });
 
       expect(createOneMock).toHaveBeenCalledWith({
         data: {

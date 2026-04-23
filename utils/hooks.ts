@@ -1,7 +1,6 @@
 import {
   ListHooks,
   BaseListTypeInfo,
-  KeystoneContextFromListTypeInfo,
 } from '@keystone-6/core/types';
 
 // ORIGINAL ITEM
@@ -62,7 +61,7 @@ const getLogMessage = (oldContract: ContractData, newContract: ContractData) => 
 };
 
 export const contractHooks: ListHooks<BaseListTypeInfo> = {
-  afterOperation: ({operation, originalItem, item, context }) => {
+  afterOperation: async ({operation, originalItem, item, context }) => {
 
     const message = getLogMessage(
       (originalItem as unknown as ContractData),
@@ -88,7 +87,7 @@ export const contractHooks: ListHooks<BaseListTypeInfo> = {
       newValues: item,
     };
 
-    context.sudo().query.ContractLogEntry.createOne({
+    await context.sudo().query.ContractLogEntry.createOne({
       data,
     })
   }

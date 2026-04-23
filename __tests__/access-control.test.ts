@@ -1,173 +1,208 @@
-import { bidAccess, contractAccess, userAccess } from '../utils/access';
+import {
+  bidAccess as bidAccessRaw,
+  contractAccess as contractAccessRaw,
+  userAccess as userAccessRaw,
+} from '../utils/access';
 
-// Type guard to check if access control is an object (not a function)
-function isAccessControlObject(access: any): access is { operation: any; filter?: any; item?: any } {
-  return typeof access === 'object' && access !== null && 'operation' in access;
-}
+const bidAccess = bidAccessRaw as any;
+const contractAccess = contractAccessRaw as any;
+const userAccess = userAccessRaw as any;
 
 describe('Access Control', () => {
   describe('bidAccess', () => {
     it('should allow owners to query bids', () => {
       const session = { data: { isOwner: true } };
-      if (isAccessControlObject(bidAccess)) {
-        const result = bidAccess.operation.query({ session });
-        expect(result).toBe(true);
-      }
+      const result = bidAccess.operation.query({ session });
+      expect(result).toBe(true);
     });
 
     it('should deny non-owners from querying bids', () => {
       const session = { data: { isOwner: false } };
-      if (isAccessControlObject(bidAccess)) {
-        const result = bidAccess.operation.query({ session });
-        expect(result).toBe(false);
-      }
+      const result = bidAccess.operation.query({ session });
+      expect(result).toBe(false);
     });
 
     it('should filter bids correctly for team owners', () => {
-      const session = { 
-        data: { 
-          isAdmin: false, 
-          team: { id: 'team123' } 
-        } 
+      const session = {
+        data: {
+          isAdmin: false,
+          team: { id: 'team123' }
+        }
       };
-      const context = { 
-        req: { 
-          headers: { 
-            origin: 'https://app.log.football' 
-          } 
-        } 
+      const context = {
+        req: {
+          headers: {
+            origin: 'https://app.log.football'
+          }
+        }
       };
-      
-      if (isAccessControlObject(bidAccess) && bidAccess.filter) {
-        const result = bidAccess.filter.query({ session, context });
-      
-        expect(result).toEqual({
-          OR: [
-            {
-              team: {
-                id: {
-                  equals: 'team123'
-                }
-              }
-            },
-            {
-              locked: {
-                not: null
+
+      const result = bidAccess.filter.query({ session, context });
+
+      expect(result).toEqual({
+        OR: [
+          {
+            team: {
+              id: {
+                equals: 'team123'
               }
             }
-          ]
-        });
-      }
+          },
+          {
+            locked: {
+              not: null
+            }
+          }
+        ]
+      });
     });
 
     it('should allow admin backend access to all bids', () => {
-      const session = { 
-        data: { 
-          isAdmin: true, 
-          team: { id: 'team123' } 
-        } 
+      const session = {
+        data: {
+          isAdmin: true,
+          team: { id: 'team123' }
+        }
       };
-      const context = { 
-        req: { 
-          headers: { 
-            origin: 'https://api.log.football' 
-          } 
-        } 
+      const context = {
+        req: {
+          headers: {
+            origin: 'https://api.log.football'
+          }
+        }
       };
-      
-      if (isAccessControlObject(bidAccess) && bidAccess.filter) {
-        const result = bidAccess.filter.query({ session, context });
-        expect(result).toEqual({});
-      }
+
+      const result = bidAccess.filter.query({ session, context });
+      expect(result).toEqual({});
     });
   });
 
   describe('contractAccess', () => {
     it('should allow authenticated users to query contracts', () => {
       const session = { data: { id: 'user123' } };
-      if (isAccessControlObject(contractAccess)) {
-        const result = contractAccess.operation.query({ session });
-        expect(result).toBe(true);
-      }
+      const result = contractAccess.operation.query({ session });
+      expect(result).toBe(true);
     });
 
     it('should deny unauthenticated users from querying contracts', () => {
       const session = null;
-      if (isAccessControlObject(contractAccess)) {
-        const result = contractAccess.operation.query({ session });
-        expect(result).toBe(false);
-      }
+      const result = contractAccess.operation.query({ session });
+      expect(result).toBe(false);
     });
 
     it('should allow team owners to update their own contracts', () => {
-      const session = { 
-        data: { 
-          isAdmin: false, 
-          team: { id: 'team123' } 
-        } 
+      const session = {
+        data: {
+          isAdmin: false,
+          team: { id: 'team123' }
+        }
       };
       const item = { teamId: 'team123' };
-      
-      if (isAccessControlObject(contractAccess) && contractAccess.item) {
-        const result = contractAccess.item.update({ session, item });
-        expect(result).toBe(true);
-      }
+
+      const result = contractAccess.item.update({ session, item });
+      expect(result).toBe(true);
     });
 
     it('should allow admins to update any contract', () => {
-      const session = { 
-        data: { 
-          isAdmin: true, 
-          team: { id: 'team123' } 
-        } 
+      const session = {
+        data: {
+          isAdmin: true,
+          team: { id: 'team123' }
+        }
       };
       const item = { teamId: 'team456' };
-      
-      if (isAccessControlObject(contractAccess) && contractAccess.item) {
-        const result = contractAccess.item.update({ session, item });
+
+      const result = contractAccess.item.update({ session, item });
+      expect(result).toBe(true);
+    });
+
+    describe('item.delete', () => {
+      it('should allow team owners to delete their own DTS contracts', () => {
+        const session = {
+          data: {
+            isAdmin: false,
+            team: { id: 'team123' }
+          }
+        };
+        const item = { status: 'dts', teamId: 'team123' };
+
+        const result = contractAccess.item.delete({ session, item });
         expect(result).toBe(true);
-      }
+      });
+
+      it('should deny team owners from deleting their own active contracts', () => {
+        const session = {
+          data: {
+            isAdmin: false,
+            team: { id: 'team123' }
+          }
+        };
+        const item = { status: 'active', teamId: 'team123' };
+
+        const result = contractAccess.item.delete({ session, item });
+        expect(result).toBe(false);
+      });
+
+      it("should deny team owners from deleting another team's DTS contract", () => {
+        const session = {
+          data: {
+            isAdmin: false,
+            team: { id: 'team123' }
+          }
+        };
+        const item = { status: 'dts', teamId: 'team456' };
+
+        const result = contractAccess.item.delete({ session, item });
+        expect(result).toBe(false);
+      });
+
+      it('should allow admins to delete any contract regardless of status or team', () => {
+        const session = {
+          data: {
+            isAdmin: true,
+            team: { id: 'team123' }
+          }
+        };
+        const item = { status: 'active', teamId: 'team456' };
+
+        const result = contractAccess.item.delete({ session, item });
+        expect(result).toBe(true);
+      });
     });
   });
 
   describe('userAccess', () => {
     it('should allow users to update their own profile', () => {
-      const session = { 
-        itemId: 'user123', 
-        data: { isAdmin: false } 
+      const session = {
+        itemId: 'user123',
+        data: { isAdmin: false }
       };
       const item = { id: 'user123' };
-      
-      if (isAccessControlObject(userAccess) && userAccess.item) {
-        const result = userAccess.item.update({ session, item });
-        expect(result).toBe(true);
-      }
+
+      const result = userAccess.item.update({ session, item });
+      expect(result).toBe(true);
     });
 
     it('should deny users from updating other profiles', () => {
-      const session = { 
-        itemId: 'user123', 
-        data: { isAdmin: false } 
+      const session = {
+        itemId: 'user123',
+        data: { isAdmin: false }
       };
       const item = { id: 'user456' };
-      
-      if (isAccessControlObject(userAccess) && userAccess.item) {
-        const result = userAccess.item.update({ session, item });
-        expect(result).toBe(false);
-      }
+
+      const result = userAccess.item.update({ session, item });
+      expect(result).toBe(false);
     });
 
     it('should allow admins to update any user', () => {
-      const session = { 
-        itemId: 'user123', 
-        data: { isAdmin: true } 
+      const session = {
+        itemId: 'user123',
+        data: { isAdmin: true }
       };
       const item = { id: 'user456' };
-      
-      if (isAccessControlObject(userAccess) && userAccess.item) {
-        const result = userAccess.item.update({ session, item });
-        expect(result).toBe(true);
-      }
+
+      const result = userAccess.item.update({ session, item });
+      expect(result).toBe(true);
     });
   });
 });
