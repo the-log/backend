@@ -169,8 +169,6 @@ export async function flagBadContracts() {
 
     // 0-year DTS contracts must be dropped/promoted
     if (contract.years < 1) {
-      console.log('TOO SHORT!');
-
       badContracts.push(contract);
     } else {
 
@@ -185,8 +183,6 @@ export async function flagBadContracts() {
 
       // If player is equalto/better than threshold must be dropped/promoted
       if (player.positionRank <= thresholds[pos]) {
-        console.log('TOO GOOD!');
-        console.log(`${player.name}, #${player.positionRank} ${pos}`);
         badContracts.push(contract);
       }
     }
