@@ -1,4 +1,10 @@
-import { getAdminContext, createTestUser, createTestTeam } from '../test-setup';
+import {
+  getAdminContext,
+  getContextWithSession,
+  createTestUser,
+  createTestTeam,
+  createTestPlayer,
+} from '../test-setup';
 
 describe('Database Integration Tests', () => {
   it('should create and query users', async () => {
@@ -51,5 +57,89 @@ describe('Database Integration Tests', () => {
     expect(team.name).toBe('Test Team');
     expect(team.abbreviation).toBe('TST');
     expect(team.espn_id).toBeDefined();
+  });
+
+  it('should create a ContractLogEntry when a contract is created', async () => {
+    const adminContext = getAdminContext();
+
+    const user = await createTestUser(adminContext, {
+      name: 'Admin',
+      email: 'admin@test.com',
+    });
+    const team = await createTestTeam(adminContext);
+    const player = await createTestPlayer(adminContext);
+
+    const userContext = getContextWithSession({
+      itemId: user.id,
+      data: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        isAdmin: true,
+        isOwner: true,
+        team: { id: team.id },
+      },
+    });
+
+    const contract = await userContext.query.Contract.createOne({
+      data: {
+        salary: 5000,
+        years: 2,
+        status: 'active',
+        team: { connect: { id: team.id } },
+        player: { connect: { id: player.id } },
+      },
+      query: 'id',
+    });
+
+    const logEntries = await adminContext.query.ContractLogEntry.findMany({
+      query: 'id message user { id } team { id } player { id } contract { id }',
+    });
+
+    expect(logEntries).toHaveLength(1);
+    expect(logEntries[0].message).toBe('New Contract');
+    expect(logEntries[0].user.id).toBe(user.id);
+    expect(logEntries[0].team.id).toBe(team.id);
+    expect(logEntries[0].player.id).toBe(player.id);
+    expect(logEntries[0].contract.id).toBe(contract.id);
+  });
+
+  it('should reject contract creation by non-admin users', async () => {
+    const adminContext = getAdminContext();
+
+    await createTestUser(adminContext, {
+      name: 'First Admin',
+      email: 'first@test.com',
+    });
+    const team = await createTestTeam(adminContext);
+    const player = await createTestPlayer(adminContext);
+    const owner = await createTestUser(adminContext, {
+      name: 'Team Owner',
+      email: 'owner@test.com',
+    });
+
+    const ownerContext = getContextWithSession({
+      itemId: owner.id,
+      data: {
+        id: owner.id,
+        name: owner.name,
+        email: owner.email,
+        isAdmin: false,
+        isOwner: true,
+        team: { id: team.id },
+      },
+    });
+
+    await expect(
+      ownerContext.query.Contract.createOne({
+        data: {
+          salary: 5000,
+          years: 2,
+          status: 'active',
+          team: { connect: { id: team.id } },
+          player: { connect: { id: player.id } },
+        },
+      })
+    ).rejects.toThrow();
   });
 });

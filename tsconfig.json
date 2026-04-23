@@ -6,6 +6,9 @@
     "noEmit": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "isolatedModules": true
-  }
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "types": ["jest", "node"]
+  },
+  "exclude": ["scripts", "node_modules"]
 }

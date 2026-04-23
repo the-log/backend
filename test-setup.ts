@@ -10,6 +10,9 @@ beforeEach(async () => {
 
 export const getTestContext = () => getContext(config, PrismaModule);
 
+export const getContextWithSession = (session: any) =>
+  getContext(config, PrismaModule).withSession(session);
+
 export const getAdminContext = () => {
   const adminSession = {
     itemId: 'test-admin-id',
