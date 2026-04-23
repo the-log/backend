@@ -7,45 +7,50 @@ const { db } = getContext(config, PrismaModule).sudo();
 
 /**
  * Script to increment league year and do all the offseason stuff.
+ *
+ * Only runs when this file is executed directly (e.g. `npm run offseason`),
+ * not when imported (e.g. from a test file that exercises individual steps).
  */
-(async () => {
+if (require.main === module) {
+  (async () => {
 
-  // 1. Terminate all waived contracts
-  await deleteWaivedContracts();
+    // 1. Terminate all waived contracts
+    await deleteWaivedContracts();
 
-  // 2. Move all IR contracts back to active roster
-  await restoreInjuredReserve();
+    // 2. Move all IR contracts back to active roster
+    await restoreInjuredReserve();
 
-  // 3. Decrement all active & dts contracts by 1 year
-  await decrementContractYears();
+    // 3. Decrement all active & dts contracts by 1 year
+    await decrementContractYears();
 
-  // 4. Change contract status for 0-year contracts to RFA
-  await setRFAContracts();
+    // 4. Change contract status for 0-year contracts to RFA
+    await setRFAContracts();
 
-  // 5. Calculate Franchise Tag Prices
-  await calculateFTRates();
+    // 5. Calculate Franchise Tag Prices
+    await calculateFTRates();
 
-  // 6. Increment all active contract salaries by 10%
-  await yearlyRaises();
+    // 6. Increment all active contract salaries by 10%
+    await yearlyRaises();
 
-  // 7. Check dts contracts for top performers & 0yrs and mark contracts
-  await flagBadContracts();
+    // 7. Check dts contracts for top performers & 0yrs and mark contracts
+    await flagBadContracts();
 
-  // 8. Add rookie draft picks for 3 years in the future
-  await createFutureDraftPicks();
+    // 8. Add rookie draft picks for 3 years in the future
+    await createFutureDraftPicks();
 
-  // 9. Set Rookie Draft Order
-  await createDraftOrder();
+    // 9. Set Rookie Draft Order
+    await createDraftOrder();
 
-  // 10. Create random RFA order
-  await createRFAOrder();
+    // 10. Create random RFA order
+    await createRFAOrder();
 
-  // 11. Email all users about league year cycling
-  // TODO
+    // 11. Email all users about league year cycling
+    // TODO
 
-})()
+  })()
+}
 
-async function deleteWaivedContracts() {
+export async function deleteWaivedContracts() {
   const contracts = await db.Contract.findMany({
     where: {
       status: {
@@ -59,7 +64,7 @@ async function deleteWaivedContracts() {
   })
 }
 
-async function restoreInjuredReserve() {
+export async function restoreInjuredReserve() {
   const contracts = await db.Contract.findMany({
     where: {
       status: {
@@ -78,7 +83,7 @@ async function restoreInjuredReserve() {
   })
 }
 
-async function decrementContractYears() {
+export async function decrementContractYears() {
   const contracts = await db.Contract.findMany({
     where: {
       status: {
@@ -97,7 +102,7 @@ async function decrementContractYears() {
   })
 }
 
-async function setRFAContracts() {
+export async function setRFAContracts() {
   const contracts = await db.Contract.findMany({
     where: {
       status: {
@@ -119,7 +124,7 @@ async function setRFAContracts() {
   })
 }
 
-async function yearlyRaises() {
+export async function yearlyRaises() {
   const contracts = await db.Contract.findMany({
     where: {
       status: {
@@ -138,7 +143,7 @@ async function yearlyRaises() {
   })
 }
 
-async function flagBadContracts() {
+export async function flagBadContracts() {
   const contracts = await db.Contract.findMany({
     where: {
       status: {
@@ -197,7 +202,7 @@ async function flagBadContracts() {
   })
 }
 
-async function createFutureDraftPicks() {
+export async function createFutureDraftPicks() {
   const year = (new Date()).getFullYear();
   const teams = await db.Team.findMany();
 
@@ -227,7 +232,7 @@ async function createFutureDraftPicks() {
   });
 }
 
-async function createDraftOrder() {
+export async function createDraftOrder() {
   const contenders = await db.Team.findMany({
     orderBy: {
       rankCalculatedFinal: "asc"
@@ -261,7 +266,7 @@ async function createDraftOrder() {
   });
 }
 
-async function calculateFTRates() {
+export async function calculateFTRates() {
   const positionRates = {
     QB: 0,
     RB: 0,
@@ -273,7 +278,7 @@ async function calculateFTRates() {
     DB: 0,
   }
 
-  for (const pos of Object.keys(positionRates)) {
+  for (const pos of Object.keys(positionRates) as Array<keyof typeof positionRates>) {
 
     let posFilter: any = {
       equals: pos
@@ -312,7 +317,7 @@ async function calculateFTRates() {
   })
 }
 
-async function createRFAOrder() {
+export async function createRFAOrder() {
   const teams = await db.Team.findMany();
 
   const order = teams.map(({id, espn_id, name}) => ({
