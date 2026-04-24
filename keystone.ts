@@ -4,44 +4,61 @@ import { lists } from './schema';
 import { withAuth, session } from './auth';
 
 const {
-  COOKIE_SECRET: sessionSecret,
   DATABASE_TYPE: dbType,
   DATABASE_URL: dbUrl,
+  CORS_ORIGINS: corsOriginsEnv,
+  NODE_ENV,
 } = process.env;
 
+if (dbType !== 'postgresql' && dbType !== 'sqlite') {
+  throw new Error(
+    `DATABASE_TYPE must be 'postgresql' or 'sqlite' (got: ${dbType ?? 'undefined'})`
+  );
+}
+if (!dbUrl) {
+  throw new Error('DATABASE_URL environment variable is required');
+}
+
+const isProd = NODE_ENV === 'production';
+const defaultCorsOrigins = [
+  'http://localhost:7777',
+  'http://app.log.football',
+  'https://app.log.football',
+  'http://log.football',
+  'https://log.football',
+  'https://app.log.ddev.site',
+];
+
+const corsOrigins = corsOriginsEnv
+  ? corsOriginsEnv.split(',').map((s) => s.trim()).filter(Boolean)
+  : defaultCorsOrigins;
+
 export default withAuth(
-  // Using the config function helps typescript guide you to the available options.
   config({
-    // the db sets the database provider - we're using sqlite for the fastest startup experience
     db: {
-      provider: dbType as 'postgresql' | 'sqlite',
-      url: dbUrl as string,
+      provider: dbType,
+      url: dbUrl,
     },
-    // This config allows us to set up features of the Admin UI https://keystonejs.com/docs/apis/config#ui
     ui: {
-      // For our starter, we check that someone has session data before letting them see the Admin UI.
-      isAccessAllowed: (context) => !!context.session?.data
+      isAccessAllowed: (context) => !!context.session?.data,
     },
     lists,
     session,
     server: {
       cors: {
-        origin: [
-          'http://localhost:7777',
-          'http://app.log.football',
-          'https://app.log.football',
-          'http://log.football',
-          'https://log.football',
-          'https://app.log.ddev.site',
-        ],
+        origin: corsOrigins,
         credentials: true,
-      }
+      },
+      options: {
+        host: isProd ? '127.0.0.1' : '0.0.0.0',
+        port: 3000,
+      },
     },
     graphql: {
       playground: true,
       apolloConfig: {
         introspection: true,
-      }
-    }
+      },
+    },
   })
 );
