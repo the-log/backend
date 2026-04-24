@@ -3,32 +3,6 @@ import {
   BaseListTypeInfo,
 } from '@keystone-6/core/types';
 
-// ORIGINAL ITEM
-// {
-//   "id": "cl8hgti2g0159bq2vt0rhftra",
-//   "node_id": 0,
-//   "salary": 1300,
-//   "years": 2,
-//   "status": "active",
-//   "teamId": "cl6e4l8g201225n2vv508t5ja",
-//   "playerId": "cl6e4lb4406625n2v0yxplfoy",
-//   "needsAttention": false,
-//   "isFranchiseTagged": false
-// }
-
-// ITEM
-// {
-//   "id": "cl8hgti2g0159bq2vt0rhftra",
-//   "node_id": 0,
-//   "salary": 1300,
-//   "years": 2,
-//   "status": "active",
-//   "teamId": "cl6e4l8g201225n2vv508t5ja",
-//   "playerId": "cl6e4lb4406625n2v0yxplfoy",
-//   "needsAttention": false,
-//   "isFranchiseTagged": false
-// }
-
 interface ContractData {
   id: string;
   node_id: number;
