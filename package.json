@@ -6,7 +6,7 @@
     "dev": "keystone dev",
     "start": "keystone start",
     "build": "keystone build",
-    "deploy": "NODE_ENV=production npm ci && pm2 stop api.log.football && NODE_ENV=production npm run build && pm2 start api.log.football",
+    "deploy": "NODE_ENV=production npm ci && pm2 stop api.log.football && NODE_ENV=production npm run build && pm2 start process.config.js",
     "postinstall": "keystone postinstall --fix",
     "scrape": "tsx scripts/scraper/index.ts",
     "offseason": "tsx scripts/offseason/index.ts",
