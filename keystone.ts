@@ -60,5 +60,6 @@ export default withAuth(
         introspection: true,
       },
     },
+    telemetry: false
   })
 );
