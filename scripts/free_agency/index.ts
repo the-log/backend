@@ -70,7 +70,7 @@ const { db, query } = getContext(config, PrismaModule).sudo();
 
         // Delete waived contract
         if (player?.contract?.id) {
-          db.Contract.deleteOne({
+          await db.Contract.deleteOne({
             where: {
               id: player.contract.id
             }
