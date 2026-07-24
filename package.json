@@ -17,9 +17,8 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
-    "@keystone-6/auth": "^8.1",
-    "@keystone-6/core": "^6.0",
-    "@keystone-6/fields-document": "^9.1",
+    "@keystone-6/auth": "^9.0",
+    "@keystone-6/core": "^7.0",
     "dotenv": "^17.4.2",
     "nodemailer": "^8.0.6",
     "tsx": "^4.9.4"
