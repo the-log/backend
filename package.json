@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@keystone-6/auth": "^8.1",
-    "@keystone-6/core": "^6.0",
+    "@keystone-6/core": "^7.0.0",
     "@keystone-6/fields-document": "^9.1",
     "dotenv": "^17.4.2",
     "nodemailer": "^8.0.6",
