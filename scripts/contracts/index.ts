@@ -2,10 +2,14 @@ import { getContext } from '@keystone-6/core/context';
 import config from '../../keystone';
 import * as PrismaModule from '@prisma/client';
 import { records } from './contracts';
+import { setDiscordEnabled } from '../../utils/discord';
 
 const { db } = getContext(config, PrismaModule).sudo();
 
 (async () => {
+  // A full wipe and re-import is maintenance, not league news.
+  setDiscordEnabled(false);
+
   // Delete all contracts.
   const contracts = await db.Contract.findMany();
   await db.Contract.deleteMany({

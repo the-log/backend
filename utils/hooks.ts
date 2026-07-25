@@ -1,68 +1,107 @@
 import {
   ListHooks,
   BaseListTypeInfo,
+  KeystoneContext,
 } from '@keystone-6/core/types';
+import {
+  buildContractEvent,
+  formatEventForDiscord,
+  ContractData,
+  ContractParties,
+  PlayerNames,
+  TeamNames,
+} from './contractMessages';
+import { postToDiscord } from './discord';
 
-interface ContractData {
-  id: string;
-  node_id: number;
-  salary: number;
-  years: number;
-  status: "active" | "dts" | "ir" | "waived" | "rfa";
-  teamId: string;
-  playerId: string;
-  needsAttention: boolean;
-  isFranchiseTagged: boolean;
-}
+const findPlayer = async (
+  context: KeystoneContext,
+  playerId: string | null | undefined
+): Promise<PlayerNames | null> => {
+  if (!playerId) return null;
 
-const getLogMessage = (oldContract: ContractData, newContract: ContractData) => {
-  if (!oldContract) return 'New Contract';
-  if (!newContract) return 'Contract Terminated';
+  try {
+    const player = await context.sudo().query.Player.findOne({
+      where: { id: playerId },
+      query: 'name position',
+    });
 
-  if (oldContract.status !== newContract.status) {
-    const statusLabels = {
-      active: 'Active Roster',
-      dts: 'DTS',
-      waived: 'Waivers',
-      ir: 'Injured Reserve',
-      rfa: 'Restricted Free Agent',
-    }
-
-    return `To ${statusLabels[newContract.status]}`
+    return player ? { name: player.name, position: player.position } : null;
+  } catch (err) {
+    console.error('contract log: player lookup failed', { playerId, err });
+    return null;
   }
+};
 
-  return 'See Details';
+const findTeam = async (
+  context: KeystoneContext,
+  teamId: string | null | undefined
+): Promise<TeamNames | null> => {
+  if (!teamId) return null;
+
+  try {
+    const team = await context.sudo().query.Team.findOne({
+      where: { id: teamId },
+      query: 'name abbreviation',
+    });
+
+    return team ? { name: team.name, abbreviation: team.abbreviation } : null;
+  } catch (err) {
+    console.error('contract log: team lookup failed', { teamId, err });
+    return null;
+  }
+};
+
+/**
+ * Resolves the names the log message needs. The previous team is only looked up
+ * when the contract actually changed hands.
+ */
+const resolveParties = async (
+  context: KeystoneContext,
+  oldContract: ContractData | null,
+  newContract: ContractData | null
+): Promise<ContractParties> => {
+  const current = newContract ?? oldContract;
+  const teamChanged =
+    Boolean(oldContract) &&
+    Boolean(newContract) &&
+    oldContract!.teamId !== newContract!.teamId;
+
+  const [player, team, previousTeam] = await Promise.all([
+    findPlayer(context, current?.playerId),
+    findTeam(context, current?.teamId),
+    teamChanged ? findTeam(context, oldContract!.teamId) : Promise.resolve(null),
+  ]);
+
+  return { player, team, previousTeam };
 };
 
 export const contractHooks: ListHooks<BaseListTypeInfo> = {
-  afterOperation: async ({operation, originalItem, item, context }) => {
+  afterOperation: async ({ operation, originalItem, item, context }) => {
+    const oldContract = (originalItem as unknown as ContractData) ?? null;
+    const newContract = (item as unknown as ContractData) ?? null;
+    const source = newContract ?? oldContract;
 
-    const message = getLogMessage(
-      (originalItem as unknown as ContractData),
-      (item as unknown as ContractData)
-    );
+    if (!source) return;
 
-    const source = operation === 'create' ? item : originalItem;
-    const contract = operation === 'delete' ? null : {
-      connect: {
-        id: source.id
-      }
-    }
+    const parties = await resolveParties(context, oldContract, newContract);
+    const event = buildContractEvent(oldContract, newContract, parties);
 
-    const user = context?.session?.itemId
+    const contract = operation === 'delete' ? null : { connect: { id: source.id } };
+    const user = context?.session?.itemId;
 
     const data = {
       contract,
-      player: source.playerId ? {connect: {id: source.playerId}} : null,
-      team: source?.teamId ? {connect: {id: source.teamId}} : null,
-      user: user ? {connect: {id: user || null}} : null,
-      message,
+      player: source.playerId ? { connect: { id: source.playerId } } : null,
+      team: source.teamId ? { connect: { id: source.teamId } } : null,
+      user: user ? { connect: { id: user } } : null,
+      message: event.message,
       oldValues: originalItem,
       newValues: item,
     };
 
-    await context.sudo().query.ContractLogEntry.createOne({
-      data,
-    })
-  }
-}
+    await context.sudo().query.ContractLogEntry.createOne({ data });
+
+    // Queued, not awaited: a slow webhook shouldn't hold up the mutation.
+    postToDiscord(formatEventForDiscord(event));
+  },
+};

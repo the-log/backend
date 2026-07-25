@@ -2,6 +2,7 @@ import { getContext } from '@keystone-6/core/context';
 import config from '../../keystone';
 import * as PrismaModule from '@prisma/client'
 import { Contract } from '../types/LogAPI';
+import { flushDiscord, postToDiscord, setDiscordEnabled } from '../../utils/discord';
 
 const { db } = getContext(config, PrismaModule).sudo();
 
@@ -14,35 +15,48 @@ const { db } = getContext(config, PrismaModule).sudo();
 if (require.main === module) {
   (async () => {
 
-    // 1. Terminate all waived contracts
-    await deleteWaivedContracts();
+    // These steps touch every contract in the league. Mute Discord so the
+    // channel gets one announcement instead of a few hundred contract posts.
+    setDiscordEnabled(false);
 
-    // 2. Move all IR contracts back to active roster
-    await restoreInjuredReserve();
+    try {
+      // 1. Terminate all waived contracts
+      await deleteWaivedContracts();
 
-    // 3. Decrement all active & dts contracts by 1 year
-    await decrementContractYears();
+      // 2. Move all IR contracts back to active roster
+      await restoreInjuredReserve();
 
-    // 4. Change contract status for 0-year contracts to RFA
-    await setRFAContracts();
+      // 3. Decrement all active & dts contracts by 1 year
+      await decrementContractYears();
 
-    // 5. Calculate Franchise Tag Prices
-    await calculateFTRates();
+      // 4. Change contract status for 0-year contracts to RFA
+      await setRFAContracts();
 
-    // 6. Increment all active contract salaries by 10%
-    await yearlyRaises();
+      // 5. Calculate Franchise Tag Prices
+      await calculateFTRates();
 
-    // 7. Check dts contracts for top performers & 0yrs and mark contracts
-    await flagBadContracts();
+      // 6. Increment all active contract salaries by 10%
+      await yearlyRaises();
 
-    // 8. Add rookie draft picks for 3 years in the future
-    await createFutureDraftPicks();
+      // 7. Check dts contracts for top performers & 0yrs and mark contracts
+      await flagBadContracts();
 
-    // 9. Set Rookie Draft Order
-    await createDraftOrder();
+      // 8. Add rookie draft picks for 3 years in the future
+      await createFutureDraftPicks();
 
-    // 10. Create random RFA order
-    await createRFAOrder();
+      // 9. Set Rookie Draft Order
+      await createDraftOrder();
+
+      // 10. Create random RFA order
+      await createRFAOrder();
+    } finally {
+      setDiscordEnabled(true);
+    }
+
+    postToDiscord(
+      '🏈 The offseason script has run. Contracts, franchise tag prices, draft order and RFA order have all been updated for the new league year. Check the app for your roster.'
+    );
+    await flushDiscord();
 
     // 11. Email all users about league year cycling
     // TODO

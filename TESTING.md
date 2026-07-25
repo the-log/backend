@@ -15,6 +15,7 @@ Tests run locally and on CI ([.github/workflows/test.yml](.github/workflows/test
 - **Runner:** Jest with TypeScript support (see [jest.config.js](jest.config.js)).
 - **Database:** SQLite. Chosen so GitHub Actions can run the full suite without spinning up a Postgres service container. The test DB lives at `backend/test.db` and is created / reset by the test setup.
 - **Env loading:** [jest.env.js](jest.env.js) loads [.env.test](.env.test) before any test runs. `.env.test` is the **only** env file the test harness reads.
+- **Discord:** [jest.env.js](jest.env.js) also blanks `DISCORD_WEBHOOK_URL`. `keystone.ts` pulls in `.env` when the test context boots, so without that line a real webhook would leak into test runs and post to the league channel. Tests that exercise posting set the variable themselves and restore it afterwards.
 - **Factories & context helpers:** [test-setup.ts](test-setup.ts) exposes `getAdminContext()`, `getContextWithSession()`, and factories (`createTestUser`, `createTestTeam`, `createTestPlayer`, `createTestContract`). Add new factories here as later phases need them.
 
 > **Note:** there used to be a `test.env` file with Postgres + ESPN scraper credentials. It was not used by Jest (it wasn't referenced anywhere in code) and has been removed. If you need scraper credentials locally, put them in `.env`, which is what the scraper actually loads via `dotenv/config`.
@@ -25,7 +26,9 @@ Tests run locally and on CI ([.github/workflows/test.yml](.github/workflows/test
 |---|---|---|
 | [__tests__/simple.test.ts](__tests__/simple.test.ts) | Sanity | Jest + env configuration |
 | [__tests__/access-control.test.ts](__tests__/access-control.test.ts) | Unit (mocked) | Access rules: roles, bid filtering, contract access, user profile |
-| [__tests__/hooks.test.ts](__tests__/hooks.test.ts) | Unit (mocked) | Contract logging hook (create/update/delete) |
+| [__tests__/hooks.test.ts](__tests__/hooks.test.ts) | Unit (mocked) | Contract logging hook (create/update/delete), name lookups, Discord post |
+| [__tests__/contract-messages.test.ts](__tests__/contract-messages.test.ts) | Unit (pure) | Log message wording for every kind of contract change, money/year formatting |
+| [__tests__/discord.test.ts](__tests__/discord.test.ts) | Unit (mocked fetch) | Webhook payload, queueing, mute switch, rate-limit retry, failure swallowing |
 | [__tests__/database-integration.test.ts](__tests__/database-integration.test.ts) | Integration (real SQLite) | User creation, first-admin hook, Team CRUD, ContractLogEntry side effect, non-admin rejection |
 
 ## Writing new tests

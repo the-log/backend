@@ -50,3 +50,37 @@ A walkthrough on how to do this is forthcoming, but in the meantime our [todo ex
 ### Embedding Keystone in a Next.js frontend
 
 While Keystone works as a standalone app, you can embed your Keystone app into a [Next.js](https://nextjs.org/) app. This is quite a different setup to the starter, and we recommend checking out our walkthrough for that [here](https://keystonejs.com/docs/walkthroughs/embedded-mode-with-sqlite-nextjs#how-to-embed-keystone-sq-lite-in-a-next-js-app).
+
+## Discord notifications
+
+Contract moves are posted to a channel in the league's Discord server. Set the
+incoming webhook URL in `.env`:
+
+```
+DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/<id>/<token>
+```
+
+To create one: Discord → Server Settings → Integrations → Webhooks → New Webhook,
+pick the channel, then Copy Webhook URL.
+
+With the variable unset, posting is skipped and everything else works as normal,
+so local development and CI stay silent by default.
+
+### What gets posted
+
+Every contract create, update and delete runs through the hook in
+[utils/hooks.ts](utils/hooks.ts), which writes a ContractLogEntry and posts the
+same sentence to Discord: signings, terminations, trades, status moves, salary
+and length changes, franchise tags and needs-attention flags.
+
+Bulk scripts mute posting around their run with `setDiscordEnabled(false)`:
+
+- **`npm run offseason`** stays silent through all its steps, then posts a single
+  announcement that the offseason has run.
+- **`npm run free-agency`** posts each awarded contract as it happens, then a
+  closing summary of how many players were awarded.
+- **`npm run import-contracts`** posts nothing at all; it's a wipe and re-import.
+
+Posts are queued and sent one at a time, and a webhook failure is logged rather
+than thrown, so Discord being down can never fail a contract mutation. Scripts
+should `await flushDiscord()` before exiting so queued posts get sent.
