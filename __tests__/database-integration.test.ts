@@ -97,7 +97,9 @@ describe('Database Integration Tests', () => {
     });
 
     expect(logEntries).toHaveLength(1);
-    expect(logEntries[0].message).toBe('New Contract');
+    expect(logEntries[0].message).toBe(
+      'Test Team signed Test Player (QB) to a $50.00 / 2 yrs contract'
+    );
     expect(logEntries[0].user.id).toBe(user.id);
     expect(logEntries[0].team.id).toBe(team.id);
     expect(logEntries[0].player.id).toBe(player.id);

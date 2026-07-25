@@ -1,6 +1,7 @@
 import { getContext } from '@keystone-6/core/context';
 import config from '../../keystone';
 import * as PrismaModule from '@prisma/client'
+import { flushDiscord, postToDiscord } from '../../utils/discord';
 
 const { db, query } = getContext(config, PrismaModule).sudo();
 
@@ -13,6 +14,7 @@ const { db, query } = getContext(config, PrismaModule).sudo();
 
   if (past.length) {
     const bids = await getOpenBids();
+    let awarded = 0;
 
     let evalOrder = 0;
     for (const bidGroup of bids.entries()) {
@@ -94,6 +96,8 @@ const { db, query } = getContext(config, PrismaModule).sudo();
             }
           }
         });
+
+        awarded++;
       }
 
       let bidOrder = 0;
@@ -121,7 +125,14 @@ const { db, query } = getContext(config, PrismaModule).sudo();
         bid_deadlines: future
       }
     });
+
+    const players = bids.size;
+    postToDiscord(
+      `📣 Free agency bids have processed: ${awarded} of ${players} ${players === 1 ? 'player' : 'players'} awarded a contract.`
+    );
   }
+
+  await flushDiscord();
 
 })()
 
