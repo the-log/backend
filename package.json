@@ -10,6 +10,7 @@
     "postinstall": "keystone postinstall --fix",
     "scrape": "tsx scripts/scraper/index.ts",
     "offseason": "tsx scripts/offseason/index.ts",
+    "bid-deadlines": "tsx scripts/offseason/bid-deadlines.ts",
     "free-agency": "tsx scripts/free_agency/index.ts",
     "import-contracts": "tsx scripts/contracts/index.ts",
     "test:build": "rm -f schema.prisma && dotenv -e .env.test -- keystone build --no-ui",
