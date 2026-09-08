@@ -3,6 +3,7 @@ import config from '../../keystone';
 import * as PrismaModule from '@prisma/client'
 import { Contract } from '../types/LogAPI';
 import { flushDiscord, postToDiscord, setDiscordEnabled } from '../../utils/discord';
+import { createBidDeadlines } from './bid-deadlines';
 
 const { db } = getContext(config, PrismaModule).sudo();
 
@@ -49,16 +50,19 @@ if (require.main === module) {
 
       // 10. Create random RFA order
       await createRFAOrder();
+
+      // 11. Set free agency bid deadlines from the NFL schedule
+      await createBidDeadlines();
     } finally {
       setDiscordEnabled(true);
     }
 
     postToDiscord(
-      '🏈 The offseason script has run. Contracts, franchise tag prices, draft order and RFA order have all been updated for the new league year. Check the app for your roster.'
+      '🏈 The offseason script has run. Contracts, franchise tag prices, draft order, RFA order and bid deadlines have all been updated for the new league year. Check the app for your roster.'
     );
     await flushDiscord();
 
-    // 11. Email all users about league year cycling
+    // 12. Email all users about league year cycling
     // TODO
 
   })()
