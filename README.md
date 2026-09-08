@@ -79,7 +79,6 @@ Bulk scripts mute posting around their run with `setDiscordEnabled(false)`:
   announcement that the offseason has run.
 - **`npm run free-agency`** posts each awarded contract as it happens, then a
   closing summary of how many players were awarded.
-- **`npm run import-contracts`** posts nothing at all; it's a wipe and re-import.
 
 Posts are queued and sent one at a time, and a webhook failure is logged rather
 than thrown, so Discord being down can never fail a contract mutation. Scripts
