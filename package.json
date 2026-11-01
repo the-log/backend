@@ -23,7 +23,7 @@
     "tsx": "^4.9.4"
   },
   "engines": {
-    "node": "^22"
+    "node": "^26.0.0"
   },
   "devDependencies": {
     "@swc/core": "^1.15.46",
